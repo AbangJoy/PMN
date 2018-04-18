@@ -1,7 +1,7 @@
 var app = new Framework7({
 	root: '#app',
 	name: 'F7App',
-	theme: 'auto',
+	theme: 'md',
 
 	panel: { swipe: 'left' },
 	routes: [
@@ -19,6 +19,16 @@ var app = new Framework7({
 		{
 			path : '/home/',
 			url : 'home.html',
+			on:{
+				pageInit:function(e,page){
+					var mySwiper = new Swiper('.swiper-container', {
+						init: true,
+						autoplay: {
+    						delay: 3000,
+  						}
+					});
+				}
+			}
 		},
 
 		{
@@ -94,15 +104,6 @@ var $$ = Dom7;
 var ip= "192.168.43.236:3000";	
 
 var mainView = app.views.create('.view-main');
-	
-var mySwiper = new Swiper('.swiper-container', {
-autoplay: {
-    delay: 1000,
-  }
-});
-
-
-mySwiper.autoplay.start();
 
 var loginScreen = app.loginScreen.create({ /* parameters */ });
 

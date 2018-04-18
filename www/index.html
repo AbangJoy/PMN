@@ -27,6 +27,23 @@
     background-image: url(img/background1.jpg) ;
       }
 
+      #fontalfafit{
+        font-family: galatic;
+        margin-left:50%;
+      }
+
+        #fontalfafit2{
+        font-family: galatic;
+        margin-left:13%;
+        margin-top:-2px;
+      }
+
+      @font-face {
+      font-family:galatic;
+ 
+       src: url(fonts/galatic.ttf);
+      }
+
 
       .col-34{
      font-family: Bookman Old Style, serif;
@@ -48,15 +65,6 @@
        border: solid 1px #000000; padding: 13px;  text-align: justify; line-height: 2px; color: white; font-size: 14px
   }
 
-  .title{
-     font-family: Bookman Old Style, serif;
-       text-transform: uppercase;
-     
-
-    
-       font-size: 20pt;
-        color: white;
-  }
 
   #tulisanbawahhome{
     font: italic 1.2em "Fira Sans", serif;
@@ -75,7 +83,7 @@
   .spasi1{ margin-top:20px; }
 
 .swiper-container {
-            height:25%;
+            height:27%;
          }
          
       
@@ -91,9 +99,63 @@
 }
 .swiper-slide {
   box-sizing: border-box;
-  border: 2px solid #ddd;
+  box-shadow: 5px 10px #888888; 
+ 
+  border-left: 2px solid #D3D3D3;
+  border-right: 2px solid #D3D3D3;
+  border-bottom: 4px solid#D3D3D3;
   background: #fff;
 }
+
+
+
+.cardshortcut1{
+      height: 25%;
+      background-image: url(img/background5.jpg) ;
+      background-size: cover;
+
+ border-bottom: 4px solid #D3D3D3;
+
+}
+
+.cardshortcut2{
+      height: 25%;
+      background-image: url(img/background6.jpg) ;
+      background-size: cover;
+ border-bottom: 4px solid #D3D3D3;
+
+}
+
+#headerfont{
+
+  font-family: galatic;
+  color: white;
+  line-height: 15px;
+  padding-top: 17px;
+}
+
+#itemfont{
+  color:white;
+  line-height: 13px;
+  padding-top: 7px;
+  font-size: 12px;
+}
+
+#footerfont{
+  font-size: 12px;
+  width: 60px;
+  height: 12px;
+  border: 2px solid;
+  border-radius: 5px;
+  border-color: blue;
+  color: white;
+  background-color: blue;
+  padding:2px;
+  padding-right: 10px;
+  padding-left:10px;
+
+}
+
  
 
     </style>
@@ -113,7 +175,7 @@
             <div class="navbar" style="background-color: transparent;">
               <div class="navbar-inner">
                 <a href="/signup/" class="button col-34 left">Sign Up</a>
-                <div class="title" style="margin-left:47px;">Alfa Fit</div>
+                 <div class="title" id="fontalfafit2">Alfa<span style=" color:red;">Fit</span></div>
                 <a href="/login/" class="button col-36 right">Login</a>
               </div>
             </div>
