@@ -1,57 +1,65 @@
+<div class="view view-main">
 <div class="page" data-name="signup">
   <div class="navbar">
-      <div class="navbar-inner">
-         <div class="left">
-             <a href="#" class="back link icon-only">
-                <i class="icon icon-back"></i>
-             </a>
-         </div>
-                     
-       </div>
+    <div class="navbar-inner">
+      <div class="left">
+        <a href="/index/" class="link">
+          <i class="icon icon-back"></i>
+        </a>
+      </div>
+
     </div>
-     <div class="page-content">
-      <div class="registration-screen-title" style="margin-top:20px; margin-left:80px; font-size:14px;">Your Fitness journey starts here</div>
-       <form action="http://localhost/phpfile/signup.php" method="POST" class="form-ajax-submit">
-        <div class="list no-hairlines-md">
-          <ul>
-            <li class="item-content item-input">
-              <div class="item-inner">
-                <div class="item-title item-label" style="font-size: 15px;"><i class="f7-icons size-16">person</i> Name</div>
-                <div class="item-input-wrap">
-                  <input id="name" name="name" type="text" placeholder="Your name">
-                  <span class="input-clear-button"></span></input>
-                </div>
-              </div>
-            </li>
-            <li class="item-content item-input">
-              <div class="item-inner">
-                <div class="item-title item-label" style="font-size: 15px;"><i class="f7-icons size-16">email</i> Email</div>
-                <div class="item-input-wrap">
-                  <input id="email" name="email" type="text" placeholder="Your email">
-                  <span class="input-clear-button"></span></input>
-                </div>
-              </div>
-            </li>
-            <li class="item-content item-input">
+  </div>
+  <div class="page-content">
+    <div class="registration-screen-title" style="margin-top:20px; margin-left:80px; font-size:14px;">Your Fitness journey starts here</div>
+    <form name="formSubmit" action="http://localhost/phpfile/signup.php" method="POST" class="form-ajax-submit">
+      <div class="list no-hairlines-md">
+        <ul>
+          <li class="item-content item-input">
             <div class="item-inner">
-              <div class="item-title item-label" style="font-size: 15px;"><i class="f7-icons size-16">lock</i> Password</div>
+              <div class="item-title item-label" style="font-size: 15px;">
+                <i class="f7-icons size-16">person</i> Name</div>
               <div class="item-input-wrap">
-                <input type="password" id="password" name="password" placeholder="Your password" >
-                 <span class="input-clear-button"></span></input>
+                <input id="name" name="name" type="text" placeholder="Your name">
+                <span class="input-clear-button"></span>
+                </input>
               </div>
             </div>
           </li>
           <li class="item-content item-input">
-              <div class="item-inner">
-                <div class="item-title item-label"></div>
-                <div class="item-input-wrap">
-                  <input type="button" name="btnsign" id="btnsign" class="button button-fill button-big" value="SUBMIT"></input>
-                </div>
+            <div class="item-inner">
+              <div class="item-title item-label" style="font-size: 15px;">
+                <i class="f7-icons size-16">email</i> Email</div>
+              <div class="item-input-wrap">
+                <input type="email" id="email" name="email" placeholder="Your email">
+                <span class="input-clear-button"></span>
+                </input>
               </div>
-            </li>   
-          </ul>
-         
-        </div>
-        </form>
-    </div>
+            </div>
+          </li>
+          <li class="item-content item-input">
+            <div class="item-inner">
+              <div class="item-title item-label" style="font-size: 15px;">
+                <i class="f7-icons size-16">lock</i> Password</div>
+              <div class="item-input-wrap">
+                <input type="password" id="pass" name="pass" placeholder="Your password">
+                <span class="input-clear-button"></span>
+                </input>
+              </div>
+            </div>
+          </li>
+          <li class="item-content item-input">
+            <div class="item-inner">
+              <div class="item-title item-label"></div>
+              <div class="item-input-wrap">
+                <input type="button" name="btnsign" id="btnsign" class="button button-fill button-big" value="SUBMIT"></input>
+              </div>
+            </div>
+          </li>
+        </ul>
+
+      </div>
+    </form>
+  </div>
+</div>
 </div>
