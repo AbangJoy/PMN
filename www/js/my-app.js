@@ -176,6 +176,21 @@ var app = new Framework7({
 		url: 'menuGeneralPlan.html',
 		on: {
 			pageInit: function (page) {
+				var jenis_kelamin;
+				app.request.post('http://localhost/phpfile/select_condition.php',
+					{
+						email: localStorage.getItem('email')
+					}, function (data) {
+						var obj = JSON.parse(data);
+						jenis_kelamin = obj[10];
+
+						if (jenis_kelamin == 'P') {
+							$$('#pindahMenuGeneralPlan').css('background-image', 'url(img/cuttingFemale.jpeg');
+							$$('#pindahMenuGeneralPlan2').css('background-image', 'url(img/bulkingFemale.jpeg');
+							$$('#pindahMenuGeneralPlan3').css('background-image', 'url(img/conditioningFemale.jpeg');
+						}
+					});
+
 				$$('#pindahMenuGeneralPlan').on('click', function () {
 
 					app.router.navigate('/cuttingGeneralPlan/');
@@ -1051,7 +1066,7 @@ var app = new Framework7({
 					var x = new FormData($$(".form-ajax-submit")[0]);
 					app.request.post('http://localhost/phpfile/signup.php', x, function (data) {
 						app.dialog.alert('Anda telah terdafar');
-						app.router.navigate('/home/');
+						app.router.navigate('/index/');
 					});
 
 				});
