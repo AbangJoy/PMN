@@ -1,145 +1,98 @@
 <div class="view view-main">
-<div class="page" style="background-color: black;">
-  <!-- Fixed/Dynamic Navbar -->
-  <div class="navbar" style="background-color:#141f1f;">
-    <div class="navbar-inner">
-      <div class="left">
-        <a href="#" class="panel-open link icon-only">
-         <i class="icon f7-icons ios-only">menu</i>
-         <i class="icon material-icons md-only">menu</i>
-        </a>
-      </div> 
-      <div class="title" id="fontalfafit">Alfa<span style="color:red;">Fit</span></div>
-    </div>
-  </div>
+  <div class="page" style="background-color: black;" data-name="exercise">
+    <!-- Fixed/Dynamic Navbar -->
+    <div class="navbar" style="background-color:#141f1f;">
+      <div class="navbar-inner">
 
-
-    <div class="panel panel-left panel-cover">
-        <div class="card demo-card-header-pic">
-        <div class="card-header align-items-flex-end">   
-        <i class="f7-icons size-50" style="margin-left:5px;">person</i>
-          <li>Age :?</li>
-          <li>bmi :?</li>
-        </div>
-
-        <div class="card-content card-content-padding">
-          <p class="name">Andra Hadi Wijaya</p>
-        </div>
-        </div>
-
-        <div class="container">
-            <div class="row">
-              <div class="col spasi1">
-                <i class="icon f7-icons ios-only">home</i>
-              <i class="icon f7-icons ios-only icon-ios-fill">home_fill</i>
-              <i class="icon material-icons md-only">home</i>
-              </div>
-              <div class="col-9 spasi1" style="color:#000000;">
-                <a href="/products/" data-panel="left" class="panel-close">Home</a>
-            </div>
-      
-            </div>
-          
-            <div class="row">
-              <div class="col spasi1">
-                <i class="fa fa-universal-access" style="margin-left:2px;"></i>
-              </div>
-            <div class="col-9 spasi1" style="color:#000000;">
-            <a href="/products/" data-panel="left" class="panel-close">My nutritions</a>
-            </div>
-    
-          </div>
-
-        <div class="row">
-            <div class="col spasi1">
-              <i class="f7-icons size-18" style="margin-left:2px;">bolt_fill</i>
-            </div>
-              <div class="col-9 spasi1" style="color:#000000;">
-              <a href="/products/" data-panel="left" class="panel-close">Disscustion</a>
-          </div>
-    
-        </div>
-
-        <div class="row">
-            <div class="col spasi1">
-              <i class="f7-icons size-18" style="margin-left:2px;">exit</i>
-            </div>
-              <div class="col-9 spasi1" style="color:#000000;">
-              <a href="/products/" data-panel="left" class="panel-close">Log out</a>
-          </div>
-    
-        </div>
-
-
-      </div> 
-      
-  </div>
-
-    <div class = "page-content infinite-scroll-content">
-       <!--  <div class="container title" style="margin-top:15px; color: white;  font-size: 14px;">please select what Exercise do you want</div> -->
-        <div class="container">
-            <div class="row no-gap">
-            <a href="/biceps-home/" class="col" id="gridexercise1" style="background-size: cover; background-image: url(img/background/biceps.jpg);">BICEPS</a>
-            <a href="/triceps-home/" class="col" id="gridexercise1" style="text-align: center;  background-size: cover; background-image: url(img/background/triceps.jpg);">TRICEPS</a>
-            <a href="/forearm-home/" class="col" id="gridexercise1" style="text-align: center;  background-size: cover; background-image: url(img/background6.jpg);">FOREARM</a>
-            </div>
-              <div class="row no-gap">
-            <a href="/chest-home/" class="col"  id="gridexercise1" style="text-align: center;  background-size: cover; background-image: url(img/background9.jpg);">CHEST</a>
-            <a href="/shoulders-home/" class="col"  id="gridexercise1" style="text-align: center;  background-size: cover; background-image: url(img/background/shoulder.jpg);">SHOULDER</a>
-            <a href="/back-home/" class="col"  id="gridexercise1" style="text-align: center;  background-size: cover; background-image: url(img/background/back.jpg);">BACK</a>
-            </div>
-              <div class="row no-gap">
-            <a href="/upperleg-home/" class="col"  id="gridexercise1" style="text-align: center; background-size: cover; background-image: url(img/background9.jpg);">UPPER<br>LEG</br></a>
-            <a href="/glutes-home/" class="col"  id="gridexercise1" style="text-align: center; background-size: cover; background-image: url(img/background5.jpg);">GLUTES</a>
-            <a href="/lowerleg-home/" class="col"  id="gridexercise1" style="text-align: center; background-size: cover; background-image: url(img/background6.jpg);">LOWER<br>LEG</br></a>
-            </div>
-              <div class="row no-gap">
-            <a href="/abs-home/" class="col"  id="gridexercise1" style="text-align: center; background-size: cover; background-image: url(img/background/abs.jpg);">ABS</a>
-            <a href="/cardio-home/" class="col"  id="gridexercise1" style="text-align: center; background-size: cover; background-image: url(img/background5.jpg);">CARDIO</a>
-            <a href="/trapezius-home/" class="col"  id="gridexercise1" style="text-align: center; background-size: cover; background-image: url(img/background6.jpg);">TRAPEZIUS</a>
-            </div>
-
-        </div>
-
-          <!-- Tabbar for switching views-tabs -->
-      <div class="toolbar tabbar-labels toolbar-bottom-md" style="background-color:#0a0f0f;">
-        <div class="toolbar-inner">
-          <a href="/home/" class="tab-link">
-            <i class="icon f7-icons ios-only">home</i>
-            <i class="icon f7-icons ios-only icon-ios-fill">home_fill</i>
-            <i class="icon material-icons md-only">home</i>
-            <span class="tabbar-label">Home</span>
-          </a>
-          <a href="/exercise/" class="tab-link tab-link-active">
-            <i class="icon f7-icons ios-only">fitness_center</i>
-             <i class="icon f7-icons ios-only icon-ios-fill">fitness_center_fill</i>
-            <i class="icon material-icons md-only">fitness_center</i>
-            <span class="tabbar-label">Exercises</span>
-          </a>
-          <a href="#view-settings" class="tab-link">
-            <i class="icon f7-icons ios-only">assignment</i>
-            <i class="icon f7-icons ios-only icon-ios-fill">assignment_fill</i>
-            <i class="icon material-icons md-only">assignment</i>
-            <span class="tabbar-label">Plans</span>
-          </a>
-           <a href="/myprofile/" class="tab-link">
-            <i class="icon f7-icons ios-only">person</i>
-            <i class="icon f7-icons ios-only icon-ios-fill">person_fill</i>
-            <i class="icon material-icons md-only">person</i>
-            <span class="tabbar-label">My Profile</span>
-          </a>
+        <div class="title" id="fontalfafit">Alfa
+          <span style="color:red;">Fit</span>
         </div>
       </div>
-
     </div>
 
-    
+
+
+    <div class="page-content infinite-scroll-content">
+      <!--  <div class="container title" style="margin-top:15px; color: white;  font-size: 14px;">please select what Exercise do you want</div> -->
+      <div class="container">
+        <div class="row no-gap">
+          <a href="/biceps-home/" class="col" id="gridexercise1" style="background-size: cover; background-image: url(img/background/biceps.jpg);">BICEPS</a>
+          <a href="/triceps-home/" class="col" id="gridexercise1" style="text-align: center;  background-size: cover; background-image: url(img/background/triceps.jpg);">TRICEPS</a>
+          <a href="/forearm-home/" class="col" id="gridexercise1" style="text-align: center;  background-size: cover; background-image: url(img/background/forearm.jpg);">FOREARM</a>
+        </div>
+        <div class="row no-gap">
+          <a href="/chest-home/" class="col" id="gridexercise1" style="text-align: center;  background-size: cover; background-image: url(img/background/chest.jpg);">CHEST</a>
+          <a href="/shoulders-home/" class="col" id="gridexercise1" style="text-align: center;  background-size: cover; background-image: url(img/background/shoulder2.jpg);">SHOULDER</a>
+          <a href="/back-home/" class="col" id="gridexercise1" style="text-align: center;  background-size: cover; background-image: url(img/background/back.jpg);">BACK</a>
+        </div>
+        <div class="row no-gap">
+          <a href="/upperleg-home/" class="col" id="gridexercise1" style="text-align: center; background-size: cover; background-image: url(img/background/upperleg.jpg);">UPPER
+            <br>LEG</br>
+          </a>
+          <a href="/glutes-home/" class="col" id="gridexercise1" style="text-align: center; background-size: cover; background-image: url(img/background/glutes.jpg);">GLUTES</a>
+          <a href="/lowerleg-home/" class="col" id="gridexercise1" style="text-align: center; background-size: cover; background-image: url(img/background/lowerlegs.jpg);">LOWER
+            <br>LEG</br>
+          </a>
+        </div>
+        <div class="row no-gap">
+          <a href="/abs-home/" class="col" id="gridexercise1" style="text-align: center; background-size: cover; background-image: url(img/background/abs.jpg);">ABS</a>
+          <a href="/cardio-home/" class="col" id="gridexercise1" style="text-align: center; background-size: cover; background-image: url(img/background/cardio.jpg);">CARDIO</a>
+          <a href="/trapezius-home/" class="col" id="gridexercise1" style="text-align: center; background-size: cover; background-image: url(img/background/trapezius.jpg);">TRAPEZIUS</a>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- Tabbar for switching views-tabs -->
+    <div class="toolbar tabbar-labels toolbar-bottom-md" style="background-color:#0a0f0f;">
+      <div class="toolbar-inner">
+        <a href="/home/" class="tab-link">
+          <i class="icon f7-icons ios-only">home</i>
+          <i class="icon f7-icons ios-only icon-ios-fill">home_fill</i>
+          <i class="icon material-icons md-only">home</i>
+          <span class="tabbar-label" style="font-size: 10px;">Home</span>
+        </a>
+        <a href="/exercise/" class="tab-link tab-link-active">
+          <i class="icon f7-icons ios-only">fitness_center</i>
+          <i class="icon f7-icons ios-only icon-ios-fill">fitness_center_fill</i>
+          <i class="icon material-icons md-only">fitness_center</i>
+          <span class="tabbar-label" style="font-size: 10px;">Exercises</span>
+        </a>
+        <a href="/plans/" class="tab-link">
+          <i class="icon f7-icons ios-only">assignment</i>
+          <i class="icon f7-icons ios-only icon-ios-fill">assignment_fill</i>
+          <i class="icon material-icons md-only">assignment</i>
+          <span class="tabbar-label" style="font-size: 10px;">Plans</span>
+        </a>
+        <a href="/setcondition/" class="tab-link">
+          <i class="icon f7-icons ios-only">star</i>
+          <i class="icon f7-icons ios-only icon-ios-fill">star_fill</i>
+          <i class="icon material-icons md-only">star</i>
+          <span class="tabbar-label" style="font-size: 10px;">My Nutritions</span>
+        </a>
+        <a href="/forum/" class="tab-link">
+          <i class="icon f7-icons ios-only">chat</i>
+          <i class="icon f7-icons ios-only icon-ios-fill">chat_fill</i>
+          <i class="icon material-icons md-only">chat</i>
+          <span class="tabbar-label" style="font-size: 10px;">Forums</span>
+        </a>
+        <a href="/myprofile/" class="tab-link">
+          <i class="icon f7-icons ios-only">person</i>
+          <i class="icon f7-icons ios-only icon-ios-fill">person_fill</i>
+          <i class="icon material-icons md-only">person</i>
+          <span class="tabbar-label" style="font-size: 10px;">My Profile</span>
+        </a>
+      </div>
+    </div>
 
 
 
- 
 
-  
 
-</div>
+
+
+
+
+  </div>
 </div>

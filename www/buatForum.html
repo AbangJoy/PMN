@@ -1,0 +1,106 @@
+<div class="view view-main">
+    <div class="page" style="background-color: black;">
+        <!-- Fixed/Dynamic Navbar -->
+        <div class="page" data-name="buatForum">
+            <div class="navbar" style="background-color:#141f1f;">
+                <div class="navbar-inner">
+                    <div class="left">
+                        <a href="/forum/" class="link">
+                            <i class="icon icon-back"></i>
+                        </a>
+                    </div>
+                    <div class="title" style="font-family: galatic; margin-left:40%;">Alfa
+                        <span style="color:red;">Fit</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-content">
+                <form name="formBuatForum" action="http://localhost/phpfile/inputForum.php" method="POST" class="form-ajax-submit">
+                    <div class="container-buatForum" style="height: 130%;">
+
+                        <div class="block-title">Buat baru</div>
+                        <div class="list no-hairlines-md">
+                            <ul>
+                                <li class="item-content item-input">
+                                    <div class="item-inner">
+                                        <div class="item-title item-label">Judul</div>
+                                        <div class="item-input-wrap">
+                                            <input type="text" placeholder="Judul yang mau ditampilkan" id="judulForum" name="judulForum" />
+                                            <span class="input-clear-button"></span>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="item-content item-input">
+                                    <div class="item-inner">
+                                        <div class="item-title item-label">Isi Text</div>
+                                        <div class="item-input-wrap">
+                                            <textarea placeholder="Isi text" id="isiForum" name="isiForum"></textarea>
+                                            <span class="input-clear-button"></span>
+                                        </div>
+                                    </div>
+                                </li>
+
+                                <li>
+                                    <input type="button" value="BUAT" class="btn btn-primary btn-md" id="btnBuatForum" style="margin-left:120px; margin-top: 15px;"
+                                    />
+                                </li>
+
+
+                            </ul>
+                        </div>
+
+
+
+                    </div>
+                </form>
+            </div>
+
+
+            <!-- Tabbar for switching views-tabs -->
+            <div class="toolbar tabbar-labels toolbar-bottom-md" style="background-color:#0a0f0f;">
+                <div class="toolbar-inner">
+                    <a href="/home/" class="tab-link">
+                        <i class="icon f7-icons ios-only">home</i>
+                        <i class="icon f7-icons ios-only icon-ios-fill">home_fill</i>
+                        <i class="icon material-icons md-only">home</i>
+                        <span class="tabbar-label" style="font-size: 10px;">Home</span>
+                    </a>
+                    <a href="/exercise/" class="tab-link tab-link-active">
+                        <i class="icon f7-icons ios-only">fitness_center</i>
+                        <i class="icon f7-icons ios-only icon-ios-fill">fitness_center_fill</i>
+                        <i class="icon material-icons md-only">fitness_center</i>
+                        <span class="tabbar-label" style="font-size: 10px;">Exercises</span>
+                    </a>
+                    <a href="/plans/" class="tab-link">
+                        <i class="icon f7-icons ios-only">assignment</i>
+                        <i class="icon f7-icons ios-only icon-ios-fill">assignment_fill</i>
+                        <i class="icon material-icons md-only">assignment</i>
+                        <span class="tabbar-label" style="font-size: 10px;">Plans</span>
+                    </a>
+                    <a href="/myNutritions/" class="tab-link">
+                        <i class="icon f7-icons ios-only">star</i>
+                        <i class="icon f7-icons ios-only icon-ios-fill">star_fill</i>
+                        <i class="icon material-icons md-only">star</i>
+                        <span class="tabbar-label" style="font-size: 10px;">My Nutritions</span>
+                    </a>
+                    <a href="/chats/" class="tab-link">
+                        <i class="icon f7-icons ios-only">chat</i>
+                        <i class="icon f7-icons ios-only icon-ios-fill">chat_fill</i>
+                        <i class="icon material-icons md-only">chat</i>
+                        <span class="tabbar-label" style="font-size: 10px;">Forums</span>
+                    </a>
+                    <a href="/myprofile/" class="tab-link">
+                        <i class="icon f7-icons ios-only">person</i>
+                        <i class="icon f7-icons ios-only icon-ios-fill">person_fill</i>
+                        <i class="icon material-icons md-only">person</i>
+                        <span class="tabbar-label" style="font-size: 10px;">My Profile</span>
+                    </a>
+                </div>
+            </div>
+
+
+        </div>
+
+    </div>
+</div>

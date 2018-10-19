@@ -1,41 +1,57 @@
-<div data-name="login" class="page no-navbar no-toolbar no-swipeback">
-  <div class="page-content login-screen-content">
-    <div class="login-screen-title" style="font-size: 14px;">Your Fitness journey starts here</div>
-    
-    <form class="form-ajax-sbumit" action="http://localhost/phpfile/login.php" method="POST">
-      <div class="list no-hairlines-md">
-        <ul>
-          <li class="item-content item-input">
-            <div class="item-inner">
-              <div class="item-title item-label" style="font-size: 15px;"><i class="f7-icons size-16">email</i> E-mail</div>
-              <div class="item-input-wrap">
-                <input type="text" name="email" id="email" 
-                placeholder="Your E-mail" >
-                 <span class="input-clear-button"></span>
-               </input>
-              </div>
-            </div>
-          </li>
-          <li class="item-content item-input">
-            <div class="item-inner">
-              <div class="item-title item-label" style="font-size: 15px;"><i class="f7-icons size-16">lock</i> Password</div>
-              <div class="item-input-wrap">
-                <input type="password" name="password" id="password" placeholder="Your password">
-                 <span class="input-clear-button"></span>
-               </input>
-              </div>
-            </div>
-          </li>
-        </ul>
+<div class="view view-main">
+  <div class="page" style="background-color: black;">
+    <div data-name="login" class="page">
+
+      <div class="navbar">
+        <div class="navbar-inner">
+          <div class="left">
+            <a href="/index/" class="link">
+              <i class="icon icon-back"></i>
+            </a>
+          </div>
+        </div>
       </div>
-      <div class="list">
-        <ul>
-          <li>
-            <input type="button" name="btnsubmit" id="btnsubmit" class="button button-fill button-big" value="LOGIN">
-          </input></li>
-      
-        </ul>
+
+      <div class="page-content login-screen-content">
+        <div class="login-screen-title" style="font-size: 14px;">Your Fitness journey starts here</div>
+
+        <form class="form-ajax-sbumit" action="http://localhost/phpfile/login.php" method="POST">
+          <div class="list no-hairlines-md">
+            <ul>
+              <li class="item-content item-input">
+                <div class="item-inner">
+                  <div class="item-title item-label" style="font-size: 15px;">
+                    <i class="f7-icons size-16">email</i> E-mail</div>
+                  <div class="item-input-wrap">
+                    <input type="text" name="email" id="email" placeholder="Your E-mail">
+                    <span class="input-clear-button"></span>
+                    </input>
+                  </div>
+                </div>
+              </li>
+              <li class="item-content item-input">
+                <div class="item-inner">
+                  <div class="item-title item-label" style="font-size: 15px;">
+                    <i class="f7-icons size-16">lock</i> Password</div>
+                  <div class="item-input-wrap">
+                    <input type="password" name="password" id="password" placeholder="Your password">
+                    <span class="input-clear-button"></span>
+                    </input>
+                  </div>
+                </div>
+              </li>
+              <li class="item-content item-input">
+                <div class="item-inner">
+                  <div class="item-title item-label"></div>
+                  <div class="item-input-wrap">
+                    <input type="button" name="btnLogin" id="btnLogin" class="button button-fill button-big" value="LOGIN"></input>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </form>
       </div>
-    </form>
+    </div>
   </div>
 </div>
