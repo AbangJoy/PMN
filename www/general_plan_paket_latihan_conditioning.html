@@ -1,35 +1,52 @@
 <div class="view view-main">
     <div class="page" style="background-color: black;">
         <!-- Fixed/Dynamic Navbar -->
-        <div class="page" data-name="TricepsPushdownVBar">
+        <div class="page" data-name="general_plan_paket_latihan">
             <div class="navbar" style="background-color:#141f1f;">
                 <div class="navbar-inner">
                     <div class="left">
-                        <a href="#" class="link backToTricepsHome">
+                        <a href="/conditioningGeneralPlan/" class="link">
                             <i class="icon icon-back"></i>
                         </a>
                     </div>
-                    <div class="title" style="font-size: 13px;">Triceps Pushdown V BAR Curl</div>
+                    <div class="title" style="font-family: galatic; margin-left: 40%;">Alfa
+                        <span style="color:red;">Fit</span>
+                    </div>
                 </div>
             </div>
 
             <div class="page-content infinite-scroll-content">
-                <div class="canvasExercise">
-                    <div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url();">
-                        <a href="#">Link Youtube</a>
+                <div class="canvasPorsiLatihan">
+                    <div class="block-title" style="text-align: center;">
+                        <b>WEEK 1</b>
                     </div>
                     <div class="block-title">
-                        <b>Fokus muscle</b>
+                        <b>SENIN</b>
                     </div>
-                    <div class="block block-strong" style="font-size: 13px;">
-                        <p>Biceps Birachi</p>
+                    <div class="block-title block-strong" style="font-size: 13px;">
+                        <h2>Biceps Birachi</h2>
+                        <h5>4 sets 12reps</h5>
+                        <a href="#" class="link">Lihat contoh gerakan</a>
+                        <h2>Triceps Cable</h2>
+                        <h5>4 sets 12reps</h5>
+                        <a href="#" class="link">Lihat contoh gerakan</a>
                     </div>
-                    <div class="block-title">
-                        <b>Deskripsi</b>
-                    </div>
-                    <div class="block block-strong" style="font-size: 13px;">
-                        <p>lorem ipsum asdasdnksandkasjndkasndkas asdnsakldn klsandkas ndklsankld</p>
-                    </div>
+                    <form name="formLanjutHariLatihan" action="http://localhost/phpfile/nextLatihan.php" method="POST"
+                        class="form-ajax-submit">
+                        <div class="list no-hairlines-md">
+                            <ul>
+                                <li class="item-content item-input">
+                                    <div class="item-inner">
+                                        <div class="item-input-group">
+                                            <input type="button" value="SELESAI LATIHAN" class="btn btn-primary btn-sm"
+                                                id="btnKomentar" style="margin-left:80px; margin-top: 15px;" />
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </form>
+
                 </div>
 
                 <div class="toolbar tabbar-labels toolbar-bottom-md" style="background-color:#0a0f0f;">

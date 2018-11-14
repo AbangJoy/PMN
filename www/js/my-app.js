@@ -51,6 +51,22 @@ var app = new Framework7({
 				$$(document).on('click', '.sheet-open', function () {
 					id = $$(this).attr('id'); //id_forum
 
+					app.request.post('http://localhost/phpfile/selectTampilKomentar.php', {
+						id_forum: id,
+					},
+						function (data) {
+							$$('.container-komentar').html('');
+							var obj = JSON.parse(data);
+							var counter = Object.keys(obj).length;
+							for (var i = 0; i < counter; i++) {
+								$$('.container-komentar').append(
+									'<div class="block-title">' + obj[i].nama_user + '</div>' +
+									'<div class="block">' +
+									'<p>' + obj[i].isi_komentar + '</p>' +
+									'</div>'
+								);
+							}
+						});
 				});
 
 				$$('#btnKomentar').on('click', function () {
@@ -62,22 +78,8 @@ var app = new Framework7({
 						email: localStorage.getItem('email')
 					},
 						function (data) {
-							// $$('.container-komentar').html('');
-							// var obj = JSON.parse(data);
-							// var counter = Object.keys(obj).length;
-							// for (var i = 0; i < counter; i++) {
-							// 	$$('.container-forum').append(
-							// 		'<div class="block-title">Block title</div>' +
-							// 		'<div class="block">' +
-							// 		'<p>Donec et nulla auctor massa pharetra adipiscing ut sit amet sem. Suspendisse molestie velit' +
-							// 		'vitae mattis tincidunt. Ut sit amet quam mollis, vulputate turpis vel, sagittis felis.' +
-							// 		'</p>' +
-							// 		'</div>'
-							// 	);
-
-
-							// }
 							app.dialog.alert(data);
+							document.getElementById("isi_komentar").value = "";
 							app.router.navigate('/forum/');
 
 						});
@@ -95,6 +97,17 @@ var app = new Framework7({
 		on: {
 			pageInit: function (e, page) {
 				$$('#btnBuatForum').on('click', function () {
+					var j = document.forms["formBuatForum"]["judulForum"].value;
+					if (j == "") {
+						app.dialog.alert("kolom Judul harus diisi");
+						return false;
+					}
+					var i = document.forms["formBuatForum"]["isiForum"].value;
+					if (i == "") {
+						app.dialog.alert("kolom Isi harus diisi");
+						return false;
+					}
+
 					var simpan_email = localStorage.getItem('email');
 					var simpan_judul = $$('#judulForum').val();
 					var simpan_isi = $$('#isiForum').val();
@@ -130,23 +143,21 @@ var app = new Framework7({
 					function (data) {
 						$$('.container').html('');
 						var obj = JSON.parse(data);
-						app.dialog.alert(obj[2]);
 						$$('.container').append(
-
 							'<div class="block-header" style="text-align: center; font-size: 20px; font-weight:bold; letter-spacing: -1px; color: black;">HASIL PERHITUNGAN' +
 							'</div>' +
 							'<div class="block-content" style="color: black;">' +
-							'<p>BMI anda adalah ' + obj[2] + '</p>' +
+							'<p>BMI anda adalah ' + obj[0].BMI + '</p>' +
 							'<h2></h2>' +
 							'<p>BMR anda adalah...</p>' +
-							'<h2>' + obj[3] + ' Kal</h2>' +
+							'<h2>' + obj[0].BMR + ' Kal</h2>' +
 							'<p>BMR adalah jumlah ' +
 							'<b>MINIMAL</b>' + ' setiap hari yang dibutuhkan oleh tubuh agar organ-organ dapat berfungsi.</p>' +
 							'<p>Berat lemak anda adalah...</p>' +
-							'<h2>' + obj[4] + 'Kg </h2>' +
+							'<h2>' + obj[0].total_fat + 'Kg </h2>' +
 							'<p>Ini adalah berat lemak yang ada pada tubuh anda saat ini.</p>' +
 							'<p>Kebutuhan kalori anda adalah...</p>' +
-							'<h2>' + obj[5] + ' Kal</h2>' +
+							'<h2>' + obj[0].kalori_harian + ' Kal</h2>' +
 							'<p>Jumlah tersebut adalah jumlah kebutuhan kalori harian yang anda harus cukupi.</p>' +
 							'</div>'
 						);
@@ -163,28 +174,20 @@ var app = new Framework7({
 		}
 	},
 
-	{
-		path: '/myNutrition/',
-		url: 'myNutrition.html',
-		on: {
-
-		}
-	},
 
 	{
 		path: '/menuGeneralPlan/',
 		url: 'menuGeneralPlan.html',
 		on: {
 			pageInit: function (page) {
-				var jenis_kelamin;
 				app.request.post('http://localhost/phpfile/select_condition.php',
 					{
 						email: localStorage.getItem('email')
 					}, function (data) {
 						var obj = JSON.parse(data);
-						jenis_kelamin = obj[10];
+						var gender = obj[0].jenis_kelamin;
 
-						if (jenis_kelamin == 'P') {
+						if (gender == 'P') {
 							$$('#pindahMenuGeneralPlan').css('background-image', 'url(img/cuttingFemale.jpeg');
 							$$('#pindahMenuGeneralPlan2').css('background-image', 'url(img/bulkingFemale.jpeg');
 							$$('#pindahMenuGeneralPlan3').css('background-image', 'url(img/conditioningFemale.jpeg');
@@ -213,6 +216,25 @@ var app = new Framework7({
 		path: '/plans/',
 		url: 'plans.html',
 		on: {
+			pageInit: function (page) {
+				$$('#cardCustomPlans').on('click', function () {
+					app.request.post('http://localhost/phpfile/cekCustomPlan.php', {
+						email: localStorage.getItem('email')
+					}, function (data) {
+						var obj = JSON.parse(data);
+						if (obj == "ada") {
+							app.router.navigate('/customplan/');
+						}
+						else {
+							app.dialog.alert("Anda masih belum mengisikan kondisi anda saat ini, harap isi terlebih dahulu", "Peringatan");
+							app.router.navigate('/setcondition/');
+						}
+
+
+					});
+
+				});
+			}
 
 		}
 
@@ -222,7 +244,110 @@ var app = new Framework7({
 		path: '/general_plan_paket_latihan_cutting/',
 		url: 'general_plan_paket_latihan_cutting.html',
 		on: {
+			pageInit: function (page) {
+				var id_plan = localStorage.getItem('id_plan');
+				app.request.post('http://localhost/phpfile/tampilPorsiLatihanGeneralPlan.php',
+					{
+						id_plan: id_plan
+					},
+					function (data) {
+						$$('.canvasPorsiLatihan').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						$$('.canvasPorsiLatihan').append(
+							'<div class="block-title" style="text-align: center;">' +
+							'<b>WEEK ' + obj[0].minggu + '</b>' +
+							'</div> <div class="block-title">' +
+							'<b>' + obj[0].hari + '</b>' +
+							'</div>');
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasPorsiLatihan').append(
+								'<div class="block-title block-strong" style="font-size: 11px;">' +
+								'<p style="font-size:14px;">' + obj[i].nama_exercise + '</p>' +
+								'<h5>' + obj[i].sets + ' sets ' + obj[i].repetisi + ' reps </h5>' +
+								'<a href="#" class="link">Lihat contoh gerakan</a>' +
+								'</div>'
+							);
+						}
+						if (obj == "gagal") {
+							app.dialog.alert("Tidak ada jadwal latihan hari ini, anda diharapkan beristirahat");
+						}
+					});
+			}
+		}
+	},
 
+	{
+		path: '/general_plan_paket_latihan_bulking/',
+		url: 'general_plan_paket_latihan_bulking.html',
+		on: {
+			pageInit: function (page) {
+				var id_plan = localStorage.getItem('id_plan');
+				app.request.post('http://localhost/phpfile/tampilPorsiLatihanGeneralPlan.php',
+					{
+						id_plan: id_plan
+					},
+					function (data) {
+						$$('.canvasPorsiLatihan').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						$$('.canvasPorsiLatihan').append(
+							'<div class="block-title" style="text-align: center;">' +
+							'<b>WEEK ' + obj[0].minggu + '</b>' +
+							'</div> <div class="block-title">' +
+							'<b>' + obj[0].hari + '</b>' +
+							'</div>');
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasPorsiLatihan').append(
+								'<div class="block-title block-strong" style="font-size: 11px;">' +
+								'<p style="font-size:14px;">' + obj[i].nama_exercise + '</p>' +
+								'<h5>' + obj[i].sets + ' sets ' + obj[i].repetisi + ' reps </h5>' +
+								'<a href="#" class="link">Lihat contoh gerakan</a>' +
+								'</div>'
+							);
+						}
+						if (obj == "gagal") {
+							app.dialog.alert("Tidak ada jadwal latihan hari ini, anda diharapkan beristirahat");
+						}
+					});
+			}
+		}
+	},
+
+	{
+		path: '/general_plan_paket_latihan_conditioning/',
+		url: 'general_plan_paket_latihan_conditioning.html',
+		on: {
+			pageInit: function (page) {
+				var id_plan = localStorage.getItem('id_plan');
+				app.request.post('http://localhost/phpfile/tampilPorsiLatihanGeneralPlan.php',
+					{
+						id_plan: id_plan
+					},
+					function (data) {
+						$$('.canvasPorsiLatihan').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						$$('.canvasPorsiLatihan').append(
+							'<div class="block-title" style="text-align: center;">' +
+							'<b>WEEK ' + obj[0].minggu + '</b>' +
+							'</div> <div class="block-title">' +
+							'<b>' + obj[0].hari + '</b>' +
+							'</div>');
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasPorsiLatihan').append(
+								'<div class="block-title block-strong" style="font-size: 11px;">' +
+								'<p style="font-size:14px;">' + obj[i].nama_exercise + '</p>' +
+								'<h5>' + obj[i].sets + ' sets ' + obj[i].repetisi + ' reps </h5>' +
+								'<a href="#" class="link">Lihat contoh gerakan</a>' +
+								'</div>'
+							);
+						}
+						if (obj == "gagal") {
+							app.dialog.alert("Tidak ada jadwal latihan hari ini, anda diharapkan beristirahat");
+						}
+					});
+			}
 		}
 	},
 
@@ -238,22 +363,22 @@ var app = new Framework7({
 						var counter = Object.keys(obj).length;
 						for (var i = 0; i < counter; i++) {
 							$$('.cuttingplanscard').append(
-
 								'<div class="card demo-card-header-pic" id="cardplanshome">' +
-
-								'<a href="/general_plan_paket_latihan_cutting/" style="height:100px; background-size: 100% 100%;background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_tampilan + ');" class="card-content card-content-padding">' +
+								'<a id="' + obj[i].id_plan + '" href="#" style="height:100px; background-size: 100% 100%;background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_tampilan + ');" class="card-content card-content-padding">' +
 								'<div class="block fullbodytrainingtitle" style="height: 20px; width: 260px; border: 1px solid; color: white; border-color: black; background-color: black;">' + obj[i].nama_plan + '</div>' +
 								'</a>' +
 								'<div class="card-footer" style="text-align: left;">' +
 								'<h7>' + obj[i].level_plan + '</h7><h7>|</h7><h7>' + obj[i].jenis_program + '</h7><h7>|</h7><h7>' + obj[i].jumlah_hari + 'days/week</h7>' +
 								'</div>' +
 								'</div>'
-
-
-
 							);
 						}
 					});
+
+				$$(document).on('click', 'a', function () {
+					localStorage.setItem('id_plan', $$(this).attr('id'));
+					app.router.navigate('/general_plan_paket_latihan_cutting/');
+				});
 			}
 		}
 
@@ -274,19 +399,21 @@ var app = new Framework7({
 
 								'<div class="card demo-card-header-pic" id="cardplanshome">' +
 
-								'<a href="/plans/" style="height:100px; background-size: 100% 100%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_tampilan + ');" class="card-content card-content-padding">' +
+								'<a id="' + obj[i].id_plan + '" href="#" style="height:100px; background-size: 100% 100%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_tampilan + ');" class="card-content card-content-padding">' +
 								'<div class="block fullbodytrainingtitle" style="height: 20px; width: 180px; border: 1px solid; color: white; border-color: black; background-color: black;">' + obj[i].nama_plan + '</div>' +
 								'</a>' +
 								'<div class="card-footer" style="text-align: left;">' +
 								'<h7>' + obj[i].level_plan + '</h7><h7>|</h7><h7>' + obj[i].jenis_program + '</h7><h7>|</h7><h7>' + obj[i].jumlah_hari + 'days/week</h7>' +
 								'</div>' +
 								'</div>'
-
-
-
 							);
 						}
 					});
+				$$(document).on('click', 'a', function () {
+					localStorage.setItem('id_plan', $$(this).attr('id'));
+					app.router.navigate('/general_plan_paket_latihan_bulking/');
+
+				});
 			}
 		}
 
@@ -307,19 +434,20 @@ var app = new Framework7({
 
 								'<div class="card demo-card-header-pic" id="cardplanshome">' +
 
-								'<a href="/plans/" style="height:100px; background-size: 100% 100%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_tampilan + ');" class="card-content card-content-padding">' +
+								'<a id="' + obj[i].id_plan + '" href="#" style="height:100px; background-size: 100% 100%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_tampilan + ');" class="card-content card-content-padding">' +
 								'<div class="block fullbodytrainingtitle" style="height: 20px; width: 180px; border: 1px solid; color: white; border-color: black; background-color: black;">' + obj[i].nama_plan + '</div>' +
 								'</a>' +
 								'<div class="card-footer" style="text-align: left;">' +
 								'<h7>' + obj[i].level_plan + '</h7><h7>|</h7><h7>' + obj[i].jenis_program + '</h7><h7>|</h7><h7>' + obj[i].jumlah_hari + 'days/week</h7>' +
 								'</div>' +
 								'</div>'
-
-
-
 							);
 						}
 					});
+				$$(document).on('click', 'a', function () {
+					localStorage.setItem('id_plan', $$(this).attr('id'));
+					app.router.navigate('/general_plan_paket_latihan_conditioning/');
+				});
 			}
 		}
 
@@ -363,44 +491,33 @@ var app = new Framework7({
 		url: 'customplan.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/cekCustomPlan.php', {
-					email: localStorage.getItem('email')
-				},
-					function (data) {
+				app.request.post('http://localhost/phpfile/select_condition.php',
+					{
+						email: localStorage.getItem('email')
+					}, function (data) {
 						var obj = JSON.parse(data);
-						if (obj == "ada") {
-							app.dialog.alert(obj);
-							app.router.navigate('/customplan/');
-						}
-						else {
-							app.dialog.alert("aaa");
-							app.router.navigate('/setcondition/');
+						var gender = obj[0].jenis_kelamin;
+						if (gender == 'P') {
+							$$('#cutting').css('background-image', 'url(img/customPlanFemaleCutting.jpg');
+							$$('#bulking').css('background-image', 'url(img/customPlanFemaleBulking.jpg');
+							$$('#conditioning').css('background-image', 'url(img/customPlanFemaleConditioning.jpg');
 						}
 					});
-			}
-		}
-	},
 
-	{
-		path: '/cekplan/',
-		url: 'plans.html',
-		on: {
-			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/cekCustomPlan.php', {
-					email: localStorage.getItem('email')
-				},
-					function (data) {
-						var obj = JSON.parse(data);
-						if (obj == "ada") {
-							app.dialog.alert(obj);
-							app.router.navigate('/customplan/');
-						}
-						else {
-							app.dialog.alert(obj);
-							app.router.navigate('/home/');
-						}
+				$$('.cardsMenuCustomPlan').on('click', function () {
+					app.request.post('http://localhost/phpfile/prosesCustomPlan.php', {
+						email: localStorage.getItem('email'),
+						program: $$(this).attr('id')
+
+					}, function (data) {
+
+
 					});
+				});
+
 			}
+
+
 		}
 	},
 
@@ -433,7 +550,7 @@ var app = new Framework7({
 
 							'<div class="item-inner">' +
 							'<div class="item-title">Height</div>' +
-							'<div class="item-after">' + obj[1] + '</div>' +
+							'<div class="item-after">' + obj[0].berat_badan + '</div>' +
 							'</div>' +
 							'</div>' +
 							'</li>' +
@@ -442,7 +559,7 @@ var app = new Framework7({
 
 							'<div class="item-inner">' +
 							'<div class="item-title">Weight</div>' +
-							'<div class="item-after">' + obj[0] + '</div>' +
+							'<div class="item-after">' + obj[0].tinggi_badan + '</div>' +
 							'</div>' +
 							'</div>' +
 							'</li>' +
@@ -451,14 +568,14 @@ var app = new Framework7({
 
 							'<div class="item-inner">' +
 							'<div class="item-title">Age</div>' +
-							'<div class="item-after">' + obj[9] + '</div>' +
+							'<div class="item-after">' + obj[0].umur + '</div>' +
 							'</div>' +
 							'</div>' +
 							'<div class="item-content">' +
 
 							'<div class="item-inner">' +
 							'<div class="item-title">Gender</div>' +
-							'<div class="item-after">' + obj[10] + '</div>' +
+							'<div class="item-after">' + obj[0].jenis_kelamin + '</div>' +
 							'</div>' +
 							'</div>' +
 							'</li>' +
@@ -467,7 +584,7 @@ var app = new Framework7({
 
 							'<div class="item-inner">' +
 							'<div class="item-title">Body type</div>' +
-							'<div class="item-after">' + obj[11] + '</div>' +
+							'<div class="item-after">' + obj[0].tipe_badan + '</div>' +
 							'</div>' +
 							'</div>' +
 							'</li>' +
@@ -476,7 +593,7 @@ var app = new Framework7({
 
 							'<div class="item-inner">' +
 							'<div class="item-title">BMI</div>' +
-							'<div class="item-after">' + obj[2] + '</div>' +
+							'<div class="item-after">' + obj[0].BMI + '</div>' +
 							'</div>' +
 							'</div>' +
 							'</li>' +
@@ -485,23 +602,17 @@ var app = new Framework7({
 
 							'<div class="item-inner">' +
 							'<div class="item-title">Total fat</div>' +
-							'<div class="item-after">' + obj[4] + '</div>' +
+							'<div class="item-after">' + obj[0].total_fat + '</div>' +
 							'</div>' +
 							'</div>' +
 							'</li>' +
-
 							'</ul>' +
-
 							'</div>' +
-
 							'</div>'
-						)
+						);
 					});
 				$$('#btnsetcondition').on('click', function () {
-
 					app.router.navigate('/setcondition/');
-
-
 				});
 
 			}
@@ -538,7 +649,6 @@ var app = new Framework7({
 					var simpan_weight = $$('#weight').val();
 					var simpan_height = $$('#height').val();
 					var simpan_age = $$('#age').val();
-					var simpan_gender = $$('#gender').val();
 					var simpan_bodytype = $$('#bodytype').val();
 					var simpan_activity = $$('#levelaktifitas').val();
 
@@ -550,7 +660,6 @@ var app = new Framework7({
 							weight: simpan_weight,
 							height: simpan_height,
 							age: simpan_age,
-							gender: simpan_gender,
 							bodytype: simpan_bodytype,
 							aktifitas: simpan_activity
 
@@ -804,7 +913,7 @@ var app = new Framework7({
 							$$('.list').append(
 								'<ul>' +
 								'<li>' +
-								'<a href="#" class="item-link item-content">' +
+								'<a id-"' + obj[i].id_exercise + '" data-href="' + obj[i].url + '" href="#" class="item-link item-content">' +
 								'<div class="item-media" style="height: 45px; width:40px; border:1px solid #0a0f0f; border-radius: 7px; margin-top:8px; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_exercise + ');"></div>' +
 								'<div class="item-inner" style="margin-top: 8px;">' +
 								'<div class="item-title-row">' +
@@ -818,6 +927,10 @@ var app = new Framework7({
 							);
 						}
 					});
+				$$(document).on('click', 'a', function () {
+					localStorage.setItem('id_exercise', $$(this).attr('id'));
+					app.router.navigate($$(this).attr('data-href'));
+				});
 			}
 		}
 	},
@@ -900,7 +1013,7 @@ var app = new Framework7({
 							$$('.list').append(
 								'<ul>' +
 								'<li>' +
-								'<a href="#" class="item-link item-content"  style="height: 60px;">' +
+								'<a id="' + obj[i].id_exercise + '" data-href="' + obj[i].url + '" href="#" class="item-link item-content"  style="height: 60px;">' +
 								'<div class="item-media" style="height: 45px; width:40px; border:1px solid #0a0f0f; border-radius: 7px; margin-top:8px; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_exercise + ');"></div>' +
 								'<div class="item-inner" style="margin-top: 8px;">' +
 								'<div class="item-title-row">' +
@@ -914,6 +1027,10 @@ var app = new Framework7({
 							);
 						}
 					});
+				$$(document).on('click', 'a', function () {
+					localStorage.setItem('id_exercise', $$(this).attr('id'));
+					app.router.navigate($$(this).attr('data-href'));
+				});
 			}
 		}
 	},
@@ -932,7 +1049,7 @@ var app = new Framework7({
 							$$('.list').append(
 								'<ul>' +
 								'<li>' +
-								'<a href="' + obj[i].url + '" class="item-link item-content" style="height: 60px;">' +
+								'<a id="' + obj[i].id_exercise + '" data-href="' + obj[i].url + '" href="#" class="item-link item-content" style="height: 60px;">' +
 								'<div class="item-media" style="height: 45px; width:40px; border:1px solid #0a0f0f; border-radius: 7px; margin-top:8px; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_exercise + ');"></div>' +
 								'<div class="item-inner" style="margin-top: 8px;">' +
 								'<div class="item-title-row">' +
@@ -946,6 +1063,11 @@ var app = new Framework7({
 							);
 						}
 					});
+
+				$$(document).on('click', 'a', function () {
+					localStorage.setItem('id_exercise', $$(this).attr('id'));
+					app.router.navigate($$(this).attr('data-href'));
+				});
 			}
 		}
 	},
@@ -1060,6 +1182,11 @@ var app = new Framework7({
 						app.dialog.alert("password kolom harus diisi");
 						return false;
 					}
+					var g = document.forms["formSubmit"]["gender"].value;
+					if (g == "") {
+						app.dialog.alert("gender kolom harus diisi");
+						return false;
+					}
 
 					app.panel.close();
 					//page.router.navigate('/product/');
@@ -1068,14 +1195,7 @@ var app = new Framework7({
 						app.dialog.alert('Anda telah terdafar');
 						app.router.navigate('/index/');
 					});
-
 				});
-
-
-
-
-
-
 			}
 		}
 
@@ -1086,23 +1206,40 @@ var app = new Framework7({
 		path: '/dumbbellAlternateHammerCurl/',
 		url: 'dumbbellAlternateHammerCurl.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
+				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
 
+				$$('.backToBicepsHome').on('click', function () {
+					app.router.navigate('/biceps-home/');
+				});
 			}
 		}
-
-	},
-
-	{
-
-		path: '/dumbbellHammerCurl/',
-		url: 'dumbbellHammerCurl.html',
-		on: {
-			pageInit: function (e, page) {
-
-			}
-		}
-
 	},
 
 	{
@@ -1110,11 +1247,40 @@ var app = new Framework7({
 		path: '/dumbbellAlternateBicepCurl/',
 		url: 'dumbbellAlternateBicepCurl.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
+				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
 
+				$$('.backToBicepsHome').on('click', function () {
+					app.router.navigate('/biceps-home/');
+				});
 			}
 		}
-
 	},
 
 	{
@@ -1122,8 +1288,37 @@ var app = new Framework7({
 		path: '/dumbbellBicepsCurl/',
 		url: 'dumbbellBicepsCurl.html',
 		on: {
-			pageInit: function (e, page) {
-				app.dialog.alert("hai");
+			pageInit: function (page) {
+				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToBicepsHome').on('click', function () {
+					app.router.navigate('/biceps-home/');
+				});
 			}
 		}
 
@@ -1134,8 +1329,37 @@ var app = new Framework7({
 		path: '/dumbbellInclineCurl/',
 		url: 'dumbbellInclineCurl.html',
 		on: {
-			pageInit: function (e, page) {
-				app.dialog.alert("hai");
+			pageInit: function (page) {
+				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToBicepsHome').on('click', function () {
+					app.router.navigate('/biceps-home/');
+				});
 			}
 		}
 
@@ -1146,8 +1370,37 @@ var app = new Framework7({
 		path: '/dumbbellConcentrationCurl/',
 		url: 'dumbbellConcentrationCurl.html',
 		on: {
-			pageInit: function (e, page) {
-				app.dialog.alert("hai");
+			pageInit: function (page) {
+				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToBicepsHome').on('click', function () {
+					app.router.navigate('/biceps-home/');
+				});
 			}
 		}
 
@@ -1158,8 +1411,37 @@ var app = new Framework7({
 		path: '/barbellCurl/',
 		url: 'barbellCurl.html',
 		on: {
-			pageInit: function (e, page) {
-				app.dialog.alert("hai");
+			pageInit: function (page) {
+				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToBicepsHome').on('click', function () {
+					app.router.navigate('/biceps-home/');
+				});
 			}
 		}
 
@@ -1170,8 +1452,37 @@ var app = new Framework7({
 		path: '/EzBarCurl/',
 		url: 'EzBarCurl.html',
 		on: {
-			pageInit: function (e, page) {
-				app.dialog.alert("hai");
+			pageInit: function (page) {
+				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToBicepsHome').on('click', function () {
+					app.router.navigate('/biceps-home/');
+				});
 			}
 		}
 
@@ -1179,11 +1490,40 @@ var app = new Framework7({
 
 	{
 
-		path: '/barbellPreacherCurl/',
-		url: 'barbellPreacherCurl.html',
+		path: '/barbellWideCurl/',
+		url: 'barbellWideCurl.html',
 		on: {
-			pageInit: function (e, page) {
-				app.dialog.alert("hai");
+			pageInit: function (page) {
+				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToBicepsHome').on('click', function () {
+					app.router.navigate('/biceps-home/');
+				});
 			}
 		}
 
@@ -1191,11 +1531,40 @@ var app = new Framework7({
 
 	{
 
-		path: '/barbellCloseGripPreacherCurl/',
-		url: 'barbellCloseGripPreacherCurl.html',
+		path: '/barbellCloseGripCurl/',
+		url: 'barbellCloseGripCurl.html',
 		on: {
-			pageInit: function (e, page) {
-				app.dialog.alert("hai");
+			pageInit: function (page) {
+				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToBicepsHome').on('click', function () {
+					app.router.navigate('/biceps-home/');
+				});
 			}
 		}
 
@@ -1203,83 +1572,82 @@ var app = new Framework7({
 
 	{
 
-		path: '/inclineAlternateBicepCurl/',
-		url: 'inclineAlternateBicepCurl.html',
+		path: '/cableCurl/',
+		url: 'cableCurl.html',
 		on: {
-			pageInit: function (e, page) {
-				app.dialog.alert("hai");
+			pageInit: function (page) {
+				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToBicepsHome').on('click', function () {
+					app.router.navigate('/biceps-home/');
+				});
 			}
 		}
 
 	},
 
-	{
-
-		path: '/dumbbellOneArmPreacherCurl/',
-		url: 'dumbbellOneArmPreacherCurl.html',
-		on: {
-			pageInit: function (e, page) {
-				app.dialog.alert("hai");
-			}
-		}
-
-	},
-
-	{
-
-		path: '/cableCloseGripCurl/',
-		url: 'cableCloseGripCurl.html',
-		on: {
-			pageInit: function (e, page) {
-				app.dialog.alert("hai");
-			}
-		}
-
-	},
-
-	{
-
-		path: '/cableRopeCurl/',
-		url: 'cableRopeCurl.html',
-		on: {
-			pageInit: function (e, page) {
-				app.dialog.alert("hai");
-			}
-		}
-
-	},
 
 	{
 
 		path: '/dumbbellSeatedCurl/',
 		url: 'dumbbellSeatedCurl.html',
 		on: {
-			pageInit: function (e, page) {
-				app.dialog.alert("hai");
-			}
-		}
-
-	},
-
-	{
-
-		path: '/dumbbellInclineBenchCurl/',
-		url: 'dumbbellInclineBenchCurl.html',
-		on: {
-			pageInit: function (e, page) {
-				app.dialog.alert("hai");
-			}
-		}
-
-	},
-
-	{
-
-		path: '/dumbbellFlexorInclineCurl/',
-		url: 'dumbbellFlexorInclineCurl.html',
-		on: {
-			pageInit: function (e, page) {
-				app.dialog.alert("hai");
+			pageInit: function (page) {
+				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToBicepsHome').on('click', function () {
+					app.router.navigate('/biceps-home/');
+				});
 			}
 		}
 
@@ -1290,32 +1658,37 @@ var app = new Framework7({
 		path: '/dumbbellSpiderCurl/',
 		url: 'dumbbellSpiderCurl.html',
 		on: {
-			pageInit: function (e, page) {
-				app.dialog.alert("hai");
-			}
-		}
-
-	},
-
-	{
-
-		path: '/dumbbellAlternateHammerPreacherCurl/',
-		url: 'dumbbellAlternateHammerPreacherCurl.html',
-		on: {
-			pageInit: function (e, page) {
-				app.dialog.alert("hai");
-			}
-		}
-
-	},
-
-	{
-
-		path: '/dumbbellSeatedHammerCurl/',
-		url: 'dumbbellSeatedHammerCurl.html',
-		on: {
-			pageInit: function (e, page) {
-				app.dialog.alert("hai");
+			pageInit: function (page) {
+				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToBicepsHome').on('click', function () {
+					app.router.navigate('/biceps-home/');
+				});
 			}
 		}
 
@@ -1326,20 +1699,37 @@ var app = new Framework7({
 		path: '/tricepsPushdownVBar/',
 		url: 'tricepsPushdownVBar.html',
 		on: {
-			pageInit: function (e, page) {
-				app.dialog.alert("hai");
-			}
-		}
-
-	},
-
-	{
-
-		path: '/cableReverseGripTricepsPushdown/',
-		url: 'cableReverseGripTricepsPushdown.html',
-		on: {
-			pageInit: function (e, page) {
-				app.dialog.alert("hai");
+			pageInit: function (page) {
+				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToTricepsHome').on('click', function () {
+					app.router.navigate('/triceps-home/');
+				});
 			}
 		}
 
@@ -1350,8 +1740,37 @@ var app = new Framework7({
 		path: '/dumbbellStandingOneArmTricepsExtension/',
 		url: 'dumbbellStandingOneArmTricepsExtension.html',
 		on: {
-			pageInit: function (e, page) {
-				app.dialog.alert("hai");
+			pageInit: function (page) {
+				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToTricepsHome').on('click', function () {
+					app.router.navigate('/triceps-home/');
+				});
 			}
 		}
 
@@ -1359,11 +1778,40 @@ var app = new Framework7({
 
 	{
 
-		path: '/dumbbellStandingTricepsExtension/',
-		url: 'dumbbellStandingTricepsExtension.html',
+		path: '/barbellStandingTricepsExtension/',
+		url: 'barbellStandingTricepsExtension.html',
 		on: {
-			pageInit: function (e, page) {
-				app.dialog.alert("hai");
+			pageInit: function (page) {
+				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToTricepsHome').on('click', function () {
+					app.router.navigate('/triceps-home/');
+				});
 			}
 		}
 
@@ -1374,8 +1822,37 @@ var app = new Framework7({
 		path: '/cableRopeTricepsPushdown/',
 		url: 'cableRopeTricepsPushdown.html',
 		on: {
-			pageInit: function (e, page) {
-				app.dialog.alert("hai");
+			pageInit: function (page) {
+				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToTricepsHome').on('click', function () {
+					app.router.navigate('/triceps-home/');
+				});
 			}
 		}
 
@@ -1386,20 +1863,37 @@ var app = new Framework7({
 		path: '/dumbbellTricepKickback/',
 		url: 'dumbbellTricepKickback.html',
 		on: {
-			pageInit: function (e, page) {
-				app.dialog.alert("hai");
-			}
-		}
-
-	},
-
-	{
-
-		path: '/dumbbellSeatedTricepsPress/',
-		url: 'dumbbellSeatedTricepsPress.html',
-		on: {
-			pageInit: function (e, page) {
-				app.dialog.alert("hai");
+			pageInit: function (page) {
+				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToTricepsHome').on('click', function () {
+					app.router.navigate('/triceps-home/');
+				});
 			}
 		}
 
@@ -1410,8 +1904,37 @@ var app = new Framework7({
 		path: '/singleBenchDip/',
 		url: 'singleBenchDip.html',
 		on: {
-			pageInit: function (e, page) {
-				app.dialog.alert("hai");
+			pageInit: function (page) {
+				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToTricepsHome').on('click', function () {
+					app.router.navigate('/triceps-home/');
+				});
 			}
 		}
 
@@ -1419,47 +1942,40 @@ var app = new Framework7({
 
 	{
 
-		path: '/EZBarTricepsExtension/',
-		url: 'EZBarTricepsExtension.html',
+		path: '/cableRopeUnderheadTricepsExtension/',
+		url: 'cableRopeUnderheadTricepsExtension.html',
 		on: {
-			pageInit: function (e, page) {
-				app.dialog.alert("hai");
-			}
-		}
-
-	},
-
-	{
-
-		path: '/dip/',
-		url: 'dip.html',
-		on: {
-			pageInit: function (e, page) {
-				app.dialog.alert("hai");
-			}
-		}
-
-	},
-
-	{
-
-		path: '/benchDip/',
-		url: 'benchDip.html',
-		on: {
-			pageInit: function (e, page) {
-				app.dialog.alert("hai");
-			}
-		}
-
-	},
-
-	{
-
-		path: '/cableOneArmTricepExtension/',
-		url: 'cableOneArmTricepExtension.html',
-		on: {
-			pageInit: function (e, page) {
-				app.dialog.alert("hai");
+			pageInit: function (page) {
+				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToTricepsHome').on('click', function () {
+					app.router.navigate('/triceps-home/');
+				});
 			}
 		}
 
@@ -1470,8 +1986,37 @@ var app = new Framework7({
 		path: '/closeTricepsPushup/',
 		url: 'closeTricepsPushup.html',
 		on: {
-			pageInit: function (e, page) {
-				app.dialog.alert("hai");
+			pageInit: function (page) {
+				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToTricepsHome').on('click', function () {
+					app.router.navigate('/triceps-home/');
+				});
 			}
 		}
 
@@ -1482,20 +2027,37 @@ var app = new Framework7({
 		path: '/dumbbellLyingSupineTwoArmTricepsExtension/',
 		url: 'dumbbellLyingSupineTwoArmTricepsExtension.html',
 		on: {
-			pageInit: function (e, page) {
-				app.dialog.alert("hai");
-			}
-		}
-
-	},
-
-	{
-
-		path: '/dumbbellLyingSingleExtension/',
-		url: 'dumbbellLyingSingleExtension.html',
-		on: {
-			pageInit: function (e, page) {
-				app.dialog.alert("hai");
+			pageInit: function (page) {
+				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToTricepsHome').on('click', function () {
+					app.router.navigate('/triceps-home/');
+				});
 			}
 		}
 
@@ -1506,8 +2068,37 @@ var app = new Framework7({
 		path: '/dumbbellLateralRaise/',
 		url: 'dumbbellLateralRaise.html',
 		on: {
-			pageInit: function (e, page) {
-				app.dialog.alert("hai");
+			pageInit: function (page) {
+				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToShouldersHome').on('click', function () {
+					app.router.navigate('/shoulders-home/');
+				});
 			}
 		}
 
@@ -1518,7 +2109,7 @@ var app = new Framework7({
 		path: '/dumbbellShoulderPress/',
 		url: 'dumbbellShoulderPress.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1530,7 +2121,7 @@ var app = new Framework7({
 		path: '/dumbbellFrontRaise/',
 		url: 'dumbbellFrontRaise.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1542,7 +2133,7 @@ var app = new Framework7({
 		path: '/DumbbellArnoldPress/',
 		url: 'DumbbellArnoldPress.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1554,7 +2145,7 @@ var app = new Framework7({
 		path: '/dumbbellStandingPress/',
 		url: 'dumbbellStandingPress.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1566,7 +2157,7 @@ var app = new Framework7({
 		path: '/barbbellShoulderPress/',
 		url: 'barbbellShoulderPress.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1578,7 +2169,7 @@ var app = new Framework7({
 		path: '/barbbellUpRightRow/',
 		url: 'barbbellUpRightRow.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1590,7 +2181,7 @@ var app = new Framework7({
 		path: '/barbbellStandingMilitaryPress/',
 		url: 'barbbellStandingMilitaryPress.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1602,7 +2193,7 @@ var app = new Framework7({
 		path: '/dumbbellBentOverDeltRaise/',
 		url: 'dumbbellBentOverDeltRaise.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1614,7 +2205,7 @@ var app = new Framework7({
 		path: '/dumbbellUpRightRow/',
 		url: 'dumbbellUpRightRow.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1626,7 +2217,7 @@ var app = new Framework7({
 		path: '/dumbbellReverseFlyes/',
 		url: 'dumbbellReverseFlyes.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1638,7 +2229,7 @@ var app = new Framework7({
 		path: '/barbbellFrontRaise/',
 		url: 'barbbellFrontRaise.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1650,7 +2241,7 @@ var app = new Framework7({
 		path: '/dumbbellSeatedSideLateralRaise/',
 		url: 'dumbbellSeatedSideLateralRaise.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1662,7 +2253,7 @@ var app = new Framework7({
 		path: '/SmithMachineOverheadShoulderPress/',
 		url: 'SmithMachineOverheadShoulderPress.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1674,7 +2265,7 @@ var app = new Framework7({
 		path: '/cableUpRightRow/',
 		url: 'cableUpRightRow.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1686,7 +2277,7 @@ var app = new Framework7({
 		path: '/cableLateralRaise/',
 		url: 'cableLateralRaise.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1698,7 +2289,7 @@ var app = new Framework7({
 		path: '/cableFrontRaise/',
 		url: 'cableFrontRaise.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1710,7 +2301,7 @@ var app = new Framework7({
 		path: '/barbbellPushPress/',
 		url: 'barbbellPushPress.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1722,7 +2313,7 @@ var app = new Framework7({
 		path: '/dumbbellFrontTwoRaise/',
 		url: 'dumbbellFrontTwoRaise.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1734,7 +2325,7 @@ var app = new Framework7({
 		path: '/weightPlateFrontRaise/',
 		url: 'weightPlateFrontRaise.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1746,7 +2337,7 @@ var app = new Framework7({
 		path: '/cableStandingReverseCurl/',
 		url: 'cableStandingReverseCurl.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1758,7 +2349,7 @@ var app = new Framework7({
 		path: '/dumbbellPalmsUpWristCurlOverABench/',
 		url: 'dumbbellPalmsUpWristCurlOverABench.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1770,7 +2361,7 @@ var app = new Framework7({
 		path: '/dumbbellPalmsDownWristCurlOverABench/',
 		url: 'dumbbellPalmsDownWristCurlOverABench.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1782,7 +2373,7 @@ var app = new Framework7({
 		path: '/barbellReverseCurl/',
 		url: 'barbellReverseCurl.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1794,7 +2385,7 @@ var app = new Framework7({
 		path: '/barbellSeatedPalmsUpWristCurl/',
 		url: 'barbellSeatedPalmsUpWristCurl.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1806,7 +2397,7 @@ var app = new Framework7({
 		path: '/barbellSeatedPalmsDownWristCurl/',
 		url: 'barbellSeatedPalmsDownWristCurl.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1818,7 +2409,7 @@ var app = new Framework7({
 		path: '/barbellPalmsUpWristCurlOverABench/',
 		url: 'barbellPalmsUpWristCurlOverABench.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1830,7 +2421,7 @@ var app = new Framework7({
 		path: '/barbellPalmsDownWristCurlOverABench/',
 		url: 'barbellPalmsDownWristCurlOverABench.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1842,7 +2433,7 @@ var app = new Framework7({
 		path: '/cableWristCurl/',
 		url: 'cableWristCurl.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1854,7 +2445,7 @@ var app = new Framework7({
 		path: '/barbellReversePreacherCurls/',
 		url: 'barbellReversePreacherCurls.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1866,7 +2457,7 @@ var app = new Framework7({
 		path: '/dumbbellSeatedPalmsDownWristCurl/',
 		url: 'dumbbellSeatedPalmsDownWristCurl.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1878,7 +2469,7 @@ var app = new Framework7({
 		path: '/dumbbellSeatedPalmsUpWristCurl/',
 		url: 'dumbbellSeatedPalmsUpWristCurl.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1890,7 +2481,7 @@ var app = new Framework7({
 		path: '/barbellBenchPress/',
 		url: 'barbellBenchPress.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1902,7 +2493,7 @@ var app = new Framework7({
 		path: '/barbellInclineBenchPress/',
 		url: 'barbellInclineBenchPress.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1914,7 +2505,7 @@ var app = new Framework7({
 		path: '/dumbbellBenchPress/',
 		url: 'dumbbellBenchPress.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1926,7 +2517,7 @@ var app = new Framework7({
 		path: '/dumbbellInclineBenchPress/',
 		url: 'dumbbellInclineBenchPress.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1938,7 +2529,7 @@ var app = new Framework7({
 		path: '/dumbbelIFly/',
 		url: 'dumbbelIFly.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1950,7 +2541,7 @@ var app = new Framework7({
 		path: '/dumbbellInclineFly/',
 		url: 'dumbbellInclineFly.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1962,7 +2553,7 @@ var app = new Framework7({
 		path: '/barbellDeclineBenchPress/',
 		url: 'barbellDeclineBenchPress.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1974,7 +2565,7 @@ var app = new Framework7({
 		path: '/dumbbellDeclineBenchPress/',
 		url: 'dumbbellDeclineBenchPress.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1986,7 +2577,7 @@ var app = new Framework7({
 		path: '/machineFly/',
 		url: 'machineFly.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -1999,7 +2590,7 @@ var app = new Framework7({
 		path: '/cableCrossOver/',
 		url: 'cableCrossOver.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -2011,7 +2602,7 @@ var app = new Framework7({
 		path: '/benchPressMachine/',
 		url: 'benchPressMachine.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -2023,7 +2614,7 @@ var app = new Framework7({
 		path: '/machineInclineChestPress/',
 		url: 'machineInclineChestPress.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -2035,7 +2626,7 @@ var app = new Framework7({
 		path: '/smithMachineBenchPress/',
 		url: 'smithMachineBenchPress.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -2047,7 +2638,7 @@ var app = new Framework7({
 		path: '/dumbbellDeclineFly/',
 		url: 'dumbbellDeclineFly.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -2059,7 +2650,7 @@ var app = new Framework7({
 		path: '/dumbbellStraightArmPullover/',
 		url: 'dumbbellStraightArmPullover.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -2071,7 +2662,7 @@ var app = new Framework7({
 		path: '/cableLowerChestRaise/',
 		url: 'cableLowerChestRaise.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -2083,7 +2674,7 @@ var app = new Framework7({
 		path: '/ButterflyMachine/',
 		url: 'ButterflyMachine.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -2095,7 +2686,7 @@ var app = new Framework7({
 		path: '/smithMachineInclineBenchPress/',
 		url: 'smithMachineInclineBenchPress.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -2107,7 +2698,7 @@ var app = new Framework7({
 		path: '/dumbbellHammerGripInclineBenchPress/',
 		url: 'dumbbellHammerGripInclineBenchPress.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -2119,7 +2710,7 @@ var app = new Framework7({
 		path: '/platePress/',
 		url: 'platePress.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -2131,7 +2722,7 @@ var app = new Framework7({
 		path: '/leverageChestPress/',
 		url: 'leverageChestPress.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -2143,7 +2734,7 @@ var app = new Framework7({
 		path: '/pushUp/',
 		url: 'pushUp.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -2155,7 +2746,7 @@ var app = new Framework7({
 		path: '/benchPushups/',
 		url: 'benchPushups.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -2167,7 +2758,7 @@ var app = new Framework7({
 		path: '/wideGripLatPulldown/',
 		url: 'wideGripLatPulldown.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -2180,7 +2771,7 @@ var app = new Framework7({
 		path: '/wideGripRearPulldowns/',
 		url: 'wideGripRearPulldowns.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -2192,7 +2783,7 @@ var app = new Framework7({
 		path: '/closeGripFrontlatPulldown/',
 		url: 'closeGripFrontlatPulldown.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
@@ -2204,7 +2795,7 @@ var app = new Framework7({
 		path: '/cableUnderhandPullDown/',
 		url: 'cableUnderhandPullDown.html',
 		on: {
-			pageInit: function (e, page) {
+			pageInit: function (page) {
 				app.dialog.alert("hai");
 			}
 		}
