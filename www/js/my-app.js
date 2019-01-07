@@ -1,6 +1,12 @@
+var $$ = Dom7;
+var ip = '192.168.43.213';
+
 var app = new Framework7({
+	view: {
+		pushState: true,
+	},
 	root: '#app',
-	name: 'F7App',
+	name: 'Alfa Fit',
 	theme: 'md',
 
 	panel: {
@@ -13,66 +19,146 @@ var app = new Framework7({
 	},
 
 	{
+		path: '/tampilFeedback/',
+		url: 'tampilFeedback.html',
+		on: {
+			pageInit: function (e, page) {
+				app.request.post('http://' + ip + '/phpfile/tampilFeedBack.php', {
+					email: localStorage.getItem('email')
+				},
+					function (data) {
+						//append nampilin hasil feedback
+						var obj = JSON.parse(data);
+						if (obj.feedback != 'failed') {
+							$$('.container').html('');
+							if (obj[0].feedback == "puas") {
+								$$('.container').append(
+									'<div class="block-header" style="text-align: center; font-size: 20px; font-weight:bold; letter-spacing:' + '-1px; color: black;">' +
+									'FEEDBACK' +
+									'</div>' +
+									'<div class="block-content" style="text-align: center; font-size: 14px; color: black;">Terima kasih ' +
+									'atas feedback yang anda berikan. Semoga program anda terus berjalan efektif' +
+									'<ul>' +
+									'<input type="button" value="Berikan Feedback Baru" class="btn btn-primary btn-sm" id="btnFeedbackBaru" style="margin-top:180px;margin-left:-30px;" />' +
+									'</ul>'
+								);
+							}
+							else {
+								$$('.container').append(
+									'<div class="block-header" style="text-align: center; font-size: 20px; font-weight:bold; letter-spacing:' + '-1px; color: black;">' +
+									'FEEDBACK' +
+									'</div>' +
+									'<div class="block-content" style="text-align: center; font-size: 14px; color: black;">Terima kasih ' +
+									'atas feedback yang anda berikan. Kami akan membuat plan terbaru secepatnya' +
+									'<ul>' +
+									'<input type="button" value="Berikan Feedback Baru" class="btn btn-primary btn-sm" id="btnFeedbackBaru" style="margin-top:180px;margin-left:-30px;" />' +
+									'</ul>'
+								);
+
+							}
+						}
+					});
+				$$(document).on('click', '#btnFeedbackBaru', function () {
+					app.router.navigate('/feedback/');
+				});
+			}
+		}
+	},
+
+	{
+		path: '/feedback/',
+		url: 'feedback.html',
+		on: {
+			pageInit: function (e, page) {
+				app.request.post('http://' + ip + '/phpfile/tampilFeedBack.php', {
+					email: localStorage.getItem('email')
+				}, function (data) {
+					var obj = JSON.parse(data);
+					if (obj.feedback != 'failed') {
+						app.router.navigate('/tampilFeedback/');
+					}
+				});
+
+				$$('.gridFeedback').on('click', function () {
+					app.request.post('http://' + ip + '/phpfile/simpanFeedback.php', {
+						email: localStorage.getItem('email'),
+						feedback: $$(this).attr('id')
+					}, function (data) {
+						app.router.navigate('/tampilFeedback/');
+					});
+				});
+			}
+		}
+	},
+
+	{
 
 		path: '/forum/',
 		url: 'forum.html',
 		on: {
 			pageInit: function (page) {
 				var id;
-				app.request.post('http://localhost/phpfile/tampilForum.php', {
+				app.request.post('http://' + ip + '/phpfile/tampilForum.php', {
 					email: localStorage.getItem('email')
 				},
 					function (data) {
-						$$('.container-forum').html('');
-						var obj = JSON.parse(data);
-						var counter = Object.keys(obj).length;
-						for (var i = 0; i < counter; i++) {
-							$$('.container-forum').append(
-								'<div class="card demo-facebook-card" style="height:30%;">' +
-								'<div class="card-header">' +
-								'<div class="demo-facebook-name">' + obj[i].email + '</div>' +
-								'<div class="demo-facebook-date">' + obj[i].tanggal_buat + '</div>' +
-								'</div>' +
-								'<div class="card-content card-content-padding">' +
-								'<p>' +
-								'<b>' + obj[i].judul_forum + '</b>' +
-								'</p>' +
-								'<p>' + obj[i].isi_forum + '</p>' +
-								'<a id="' + obj[i].id_forum + '" href="#" class="link sheet-open" data-sheet=".komentarSheet" style="color: black;">' +
-								'<i class="f7-icons chats">chats</i>' +
-								'<p style="margin-top: 10px; margin-left: 5px;">' + obj[i].komentar + '</p>' +
-								'</a>' +
-								'</div>' +
-								'</div>'
-							);
+						if (data != 0) {
+							$$('.container-forum').html('');
+							var obj = JSON.parse(data);
+							var counter = Object.keys(obj).length;
+							for (var i = 0; i < counter; i++) {
+								$$('.container-forum').append(
+									'<div class="card demo-facebook-card" style="height:30%;">' +
+									'<div class="card-header">' +
+									'<div class="demo-facebook-name">' + obj[i].email + '</div>' +
+									'<div class="demo-facebook-date">' + obj[i].tanggal_buat + '</div>' +
+									'</div>' +
+									'<div class="card-content card-content-padding">' +
+									'<p>' +
+									'<b>' + obj[i].judul_forum + '</b>' +
+									'</p>' +
+									'<p>' + obj[i].isi_forum + '</p>' +
+									'<a id="' + obj[i].id_forum + '" href="#" class="link sheet-open" data-sheet=".komentarSheet" style="color: black;">' +
+									'<i class="f7-icons chats">chats</i>' +
+									'<p style="margin-top: 10px; margin-left: 5px;">' + obj[i].komentar + '</p>' +
+									'</a>' +
+									'</div>' +
+									'</div>'
+								);
+							}
 						}
 					});
 
 				$$(document).on('click', '.sheet-open', function () {
 					id = $$(this).attr('id'); //id_forum
 
-					app.request.post('http://localhost/phpfile/selectTampilKomentar.php', {
+					app.request.post('http://' + ip + '/phpfile/selectTampilKomentar.php', {
 						id_forum: id,
 					},
 						function (data) {
 							$$('.container-komentar').html('');
-							var obj = JSON.parse(data);
-							var counter = Object.keys(obj).length;
-							for (var i = 0; i < counter; i++) {
-								$$('.container-komentar').append(
-									'<div class="block-title">' + obj[i].nama_user + '</div>' +
-									'<div class="block">' +
-									'<p>' + obj[i].isi_komentar + '</p>' +
-									'</div>'
-								);
+							if (data != "0 results") {
+								var obj = JSON.parse(data);
+								var counter = Object.keys(obj).length;
+								for (var i = 0; i < counter; i++) {
+									$$('.container-komentar').append(
+										'<div class="block-title">' + obj[i].nama_user + '</div>' +
+										'<div class="block">' +
+										'<p>' + obj[i].isi_komentar + '</p>' +
+										'</div>'
+									);
+								}
 							}
 						});
 				});
 
 				$$('#btnKomentar').on('click', function () {
 					var isiKomentar = $$('#isi_komentar').val();
-
-					app.request.post('http://localhost/phpfile/inputKomentar.php', {
+					if (isiKomentar == "") {
+						app.dialog.alert("Komentar harus diisi");
+						return false;
+					}
+					app.request.post('http://' + ip + '/phpfile/inputKomentar.php', {
 						komentar: isiKomentar,
 						id_forum: id,
 						email: localStorage.getItem('email')
@@ -81,11 +167,8 @@ var app = new Framework7({
 							app.dialog.alert(data);
 							document.getElementById("isi_komentar").value = "";
 							app.router.navigate('/forum/');
-
 						});
 				});
-
-
 			}
 		}
 	},
@@ -112,7 +195,7 @@ var app = new Framework7({
 					var simpan_judul = $$('#judulForum').val();
 					var simpan_isi = $$('#isiForum').val();
 
-					app.request.post('http://localhost/phpfile/inputForum.php',
+					app.request.post('http://' + ip + '/phpfile/inputForum.php',
 						{
 							email: simpan_email,
 							judul: simpan_judul,
@@ -126,10 +209,7 @@ var app = new Framework7({
 
 				});
 			}
-
 		}
-
-
 	},
 
 	{
@@ -137,7 +217,7 @@ var app = new Framework7({
 		url: 'informasiKondisi.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/select_condition.php', {
+				app.request.post('http://' + ip + '/phpfile/select_condition.php', {
 					email: localStorage.getItem('email')
 				},
 					function (data) {
@@ -147,8 +227,8 @@ var app = new Framework7({
 							'<div class="block-header" style="text-align: center; font-size: 20px; font-weight:bold; letter-spacing: -1px; color: black;">HASIL PERHITUNGAN' +
 							'</div>' +
 							'<div class="block-content" style="color: black;">' +
-							'<p>BMI anda adalah ' + obj[0].BMI + '</p>' +
-							'<h2></h2>' +
+							'<p>BMI anda adalah...</p>' +
+							'<h2>' + obj[0].BMI + ' </h2>' +
 							'<p>BMR anda adalah...</p>' +
 							'<h2>' + obj[0].BMR + ' Kal</h2>' +
 							'<p>BMR adalah jumlah ' +
@@ -157,8 +237,17 @@ var app = new Framework7({
 							'<h2>' + obj[0].total_fat + 'Kg </h2>' +
 							'<p>Ini adalah berat lemak yang ada pada tubuh anda saat ini.</p>' +
 							'<p>Kebutuhan kalori anda adalah...</p>' +
-							'<h2>' + obj[0].kalori_harian + ' Kal</h2>' +
+							'<h2>' + obj[0].kalori_harian + ' Kalori</h2>' +
 							'<p>Jumlah tersebut adalah jumlah kebutuhan kalori harian yang anda harus cukupi.</p>' +
+							'<p>Nasi putih 100 grams (175 kalori) </p>' +
+							'<p>Nasi goreng 100 grams ( 267 kalori) </p>' +
+							'<p>Mie goreng 200 grams ( 321 kalori) </p>' +
+							'<p>Kebutuhan Karbohidrat harian anda adalah...</p>' +
+							'<h2>' + obj[0].karbohidrat_harian + ' grams</h2>' +
+							'<p>Kebutuhan Protein harian anda adalah...</p>' +
+							'<h2>' + obj[0].protein_harian + ' grams</h2>' +
+							'<p>Kebutuhan Lemak harian anda adalah...</p>' +
+							'<h2>' + obj[0].lemak_harian + ' grams</h2>' +
 							'</div>'
 						);
 					});
@@ -180,13 +269,12 @@ var app = new Framework7({
 		url: 'menuGeneralPlan.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/select_condition.php',
+				app.request.post('http://' + ip + '/phpfile/select_condition.php',
 					{
 						email: localStorage.getItem('email')
 					}, function (data) {
 						var obj = JSON.parse(data);
 						var gender = obj[0].jenis_kelamin;
-
 						if (gender == 'P') {
 							$$('#pindahMenuGeneralPlan').css('background-image', 'url(img/cuttingFemale.jpeg');
 							$$('#pindahMenuGeneralPlan2').css('background-image', 'url(img/bulkingFemale.jpeg');
@@ -218,7 +306,7 @@ var app = new Framework7({
 		on: {
 			pageInit: function (page) {
 				$$('#cardCustomPlans').on('click', function () {
-					app.request.post('http://localhost/phpfile/cekCustomPlan.php', {
+					app.request.post('http://' + ip + '/phpfile/cekCustomPlan.php', {
 						email: localStorage.getItem('email')
 					}, function (data) {
 						var obj = JSON.parse(data);
@@ -246,33 +334,37 @@ var app = new Framework7({
 		on: {
 			pageInit: function (page) {
 				var id_plan = localStorage.getItem('id_plan');
-				app.request.post('http://localhost/phpfile/tampilPorsiLatihanGeneralPlan.php',
+				app.request.post('http://' + ip + '/phpfile/tampilPorsiLatihanGeneralPlan.php',
 					{
 						id_plan: id_plan
 					},
 					function (data) {
-						$$('.canvasPorsiLatihan').html('');
-						var obj = JSON.parse(data);
-						var counter = Object.keys(obj).length;
-						$$('.canvasPorsiLatihan').append(
-							'<div class="block-title" style="text-align: center;">' +
-							'<b>WEEK ' + obj[0].minggu + '</b>' +
-							'</div> <div class="block-title">' +
-							'<b>' + obj[0].hari + '</b>' +
-							'</div>');
-						for (var i = 0; i < counter; i++) {
+						if (data != 0) {
+							$$('.canvasPorsiLatihan').html('');
+							var obj = JSON.parse(data);
+							var counter = Object.keys(obj).length;
 							$$('.canvasPorsiLatihan').append(
-								'<div class="block-title block-strong" style="font-size: 11px;">' +
-								'<p style="font-size:14px;">' + obj[i].nama_exercise + '</p>' +
-								'<h5>' + obj[i].sets + ' sets ' + obj[i].repetisi + ' reps </h5>' +
-								'<a href="#" class="link">Lihat contoh gerakan</a>' +
-								'</div>'
-							);
-						}
-						if (obj == "gagal") {
-							app.dialog.alert("Tidak ada jadwal latihan hari ini, anda diharapkan beristirahat");
+								// '<div class="block-title" style="text-align: center;">' +
+								// '<b>WEEK ' + obj[0].minggu + '</b>' +
+								'</div> <div class="block-title">' +
+								'<b>' + obj[0].hari + '</b>' +
+								'</div>');
+							for (var i = 0; i < counter; i++) {
+								$$('.canvasPorsiLatihan').append(
+									'<div class="block-title block-strong" style="font-size: 11px;">' +
+									'<p style="font-size:14px;">' + obj[i].nama_exercise + '</p>' +
+									'<h5>' + obj[i].sets + ' sets ' + obj[i].repetisi + ' reps </h5>' +
+									'<a href="#" class="link">Lihat contoh gerakan</a>' +
+									'</div>'
+								);
+							}
+
 						}
 					});
+
+				$$('#btnFeedback').on('click', function () {
+					app.router.navigate('/feedback/');
+				});
 			}
 		}
 	},
@@ -283,32 +375,30 @@ var app = new Framework7({
 		on: {
 			pageInit: function (page) {
 				var id_plan = localStorage.getItem('id_plan');
-				app.request.post('http://localhost/phpfile/tampilPorsiLatihanGeneralPlan.php',
+				app.request.post('http://' + ip + '/phpfile/tampilPorsiLatihanGeneralPlan.php',
 					{
 						id_plan: id_plan
 					},
 					function (data) {
-						$$('.canvasPorsiLatihan').html('');
-						var obj = JSON.parse(data);
-						var counter = Object.keys(obj).length;
-						$$('.canvasPorsiLatihan').append(
-							'<div class="block-title" style="text-align: center;">' +
-							'<b>WEEK ' + obj[0].minggu + '</b>' +
-							'</div> <div class="block-title">' +
-							'<b>' + obj[0].hari + '</b>' +
-							'</div>');
-						for (var i = 0; i < counter; i++) {
+						if (data != 0) {
+							$$('.canvasPorsiLatihan').html('');
+							var obj = JSON.parse(data);
+							var counter = Object.keys(obj).length;
 							$$('.canvasPorsiLatihan').append(
-								'<div class="block-title block-strong" style="font-size: 11px;">' +
-								'<p style="font-size:14px;">' + obj[i].nama_exercise + '</p>' +
-								'<h5>' + obj[i].sets + ' sets ' + obj[i].repetisi + ' reps </h5>' +
-								'<a href="#" class="link">Lihat contoh gerakan</a>' +
-								'</div>'
-							);
+								'</div> <div class="block-title">' +
+								'<b>' + obj[0].hari + '</b>' +
+								'</div>');
+							for (var i = 0; i < counter; i++) {
+								$$('.canvasPorsiLatihan').append(
+									'<div class="block-title block-strong" style="font-size: 11px;">' +
+									'<p style="font-size:14px;">' + obj[i].nama_exercise + '</p>' +
+									'<h5>' + obj[i].sets + ' sets ' + obj[i].repetisi + ' reps </h5>' +
+									'<a href="#" class="link">Lihat contoh gerakan</a>' +
+									'</div>'
+								);
+							}
 						}
-						if (obj == "gagal") {
-							app.dialog.alert("Tidak ada jadwal latihan hari ini, anda diharapkan beristirahat");
-						}
+
 					});
 			}
 		}
@@ -320,32 +410,32 @@ var app = new Framework7({
 		on: {
 			pageInit: function (page) {
 				var id_plan = localStorage.getItem('id_plan');
-				app.request.post('http://localhost/phpfile/tampilPorsiLatihanGeneralPlan.php',
+				app.request.post('http://' + ip + '/phpfile/tampilPorsiLatihanGeneralPlan.php',
 					{
 						id_plan: id_plan
 					},
 					function (data) {
-						$$('.canvasPorsiLatihan').html('');
-						var obj = JSON.parse(data);
-						var counter = Object.keys(obj).length;
-						$$('.canvasPorsiLatihan').append(
-							'<div class="block-title" style="text-align: center;">' +
-							'<b>WEEK ' + obj[0].minggu + '</b>' +
-							'</div> <div class="block-title">' +
-							'<b>' + obj[0].hari + '</b>' +
-							'</div>');
-						for (var i = 0; i < counter; i++) {
+						if (data != 0) {
+							$$('.canvasPorsiLatihan').html('');
+							var obj = JSON.parse(data);
+							var counter = Object.keys(obj).length;
 							$$('.canvasPorsiLatihan').append(
-								'<div class="block-title block-strong" style="font-size: 11px;">' +
-								'<p style="font-size:14px;">' + obj[i].nama_exercise + '</p>' +
-								'<h5>' + obj[i].sets + ' sets ' + obj[i].repetisi + ' reps </h5>' +
-								'<a href="#" class="link">Lihat contoh gerakan</a>' +
-								'</div>'
-							);
+								'</div> <div class="block-title">' +
+								'<b>' + obj[0].hari + '</b>' +
+								'</div>');
+							for (var i = 0; i < counter; i++) {
+								$$('.canvasPorsiLatihan').append(
+									'<div class="block-title block-strong" style="font-size: 11px;">' +
+									'<p style="font-size:14px;">' + obj[i].nama_exercise + '</p>' +
+									'<h5>' + obj[i].sets + ' sets ' + obj[i].repetisi + ' reps </h5>' +
+									'<a href="#" class="link">Lihat contoh gerakan</a>' +
+									'</div>'
+								);
+							}
 						}
-						if (obj == "gagal") {
-							app.dialog.alert("Tidak ada jadwal latihan hari ini, anda diharapkan beristirahat");
-						}
+						// else {
+						// 	app.dialog.alert("maaf Hari ini tidak ada latihan");
+						// }
 					});
 			}
 		}
@@ -356,7 +446,7 @@ var app = new Framework7({
 		url: 'cuttingGeneralPlan.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/cuttingGeneralPlan.php',
+				app.request.post('http://' + ip + '/phpfile/cuttingGeneralPlan.php',
 					function (data) {
 						$$('.cuttingplanscard').html('');
 						var obj = JSON.parse(data);
@@ -364,21 +454,23 @@ var app = new Framework7({
 						for (var i = 0; i < counter; i++) {
 							$$('.cuttingplanscard').append(
 								'<div class="card demo-card-header-pic" id="cardplanshome">' +
-								'<a id="' + obj[i].id_plan + '" href="#" style="height:100px; background-size: 100% 100%;background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_tampilan + ');" class="card-content card-content-padding">' +
+								'<a id="' + obj[i].id_plan + '" href="#" style="height:100px; background-size: 100% 100%;background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_tampilan + ');" class="card-content card-content-padding cuttingGeneralPlan">' +
 								'<div class="block fullbodytrainingtitle" style="height: 20px; width: 260px; border: 1px solid; color: white; border-color: black; background-color: black;">' + obj[i].nama_plan + '</div>' +
 								'</a>' +
 								'<div class="card-footer" style="text-align: left;">' +
-								'<h7>' + obj[i].level_plan + '</h7><h7>|</h7><h7>' + obj[i].jenis_program + '</h7><h7>|</h7><h7>' + obj[i].jumlah_hari + 'days/week</h7>' +
+								'<h7>' + obj[i].level_plan + '</h7><h7>|</h7><h7>' + obj[i].jenis_program +
 								'</div>' +
 								'</div>'
 							);
 						}
 					});
 
-				$$(document).on('click', 'a', function () {
+				$$(document).on('click', '.cuttingGeneralPlan', function () {
 					localStorage.setItem('id_plan', $$(this).attr('id'));
 					app.router.navigate('/general_plan_paket_latihan_cutting/');
 				});
+
+
 			}
 		}
 
@@ -389,30 +481,27 @@ var app = new Framework7({
 		url: 'bulkingGeneralPlan.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/bulkingGeneralPlan.php',
+				app.request.post('http://' + ip + '/phpfile/bulkingGeneralPlan.php',
 					function (data) {
 						$$('.bulkingplanscard').html('');
 						var obj = JSON.parse(data);
 						var counter = Object.keys(obj).length;
 						for (var i = 0; i < counter; i++) {
 							$$('.bulkingplanscard').append(
-
 								'<div class="card demo-card-header-pic" id="cardplanshome">' +
-
-								'<a id="' + obj[i].id_plan + '" href="#" style="height:100px; background-size: 100% 100%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_tampilan + ');" class="card-content card-content-padding">' +
+								'<a id="' + obj[i].id_plan + '" href="#" style="height:100px; background-size: 100% 100%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_tampilan + ');" class="card-content card-content-padding bulkingGeneralPlan">' +
 								'<div class="block fullbodytrainingtitle" style="height: 20px; width: 180px; border: 1px solid; color: white; border-color: black; background-color: black;">' + obj[i].nama_plan + '</div>' +
 								'</a>' +
 								'<div class="card-footer" style="text-align: left;">' +
-								'<h7>' + obj[i].level_plan + '</h7><h7>|</h7><h7>' + obj[i].jenis_program + '</h7><h7>|</h7><h7>' + obj[i].jumlah_hari + 'days/week</h7>' +
+								'<h7>' + obj[i].level_plan + '</h7><h7>|</h7><h7>' + obj[i].jenis_program +
 								'</div>' +
 								'</div>'
 							);
 						}
 					});
-				$$(document).on('click', 'a', function () {
+				$$(document).on('click', '.bulkingGeneralPlan', function () {
 					localStorage.setItem('id_plan', $$(this).attr('id'));
 					app.router.navigate('/general_plan_paket_latihan_bulking/');
-
 				});
 			}
 		}
@@ -424,27 +513,25 @@ var app = new Framework7({
 		url: 'conditioningGeneralPlan.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/conditioningGeneralPlan.php',
+				app.request.post('http://' + ip + '/phpfile/conditioningGeneralPlan.php',
 					function (data) {
 						$$('.conditioningplanscard').html('');
 						var obj = JSON.parse(data);
 						var counter = Object.keys(obj).length;
 						for (var i = 0; i < counter; i++) {
 							$$('.conditioningplanscard').append(
-
 								'<div class="card demo-card-header-pic" id="cardplanshome">' +
-
-								'<a id="' + obj[i].id_plan + '" href="#" style="height:100px; background-size: 100% 100%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_tampilan + ');" class="card-content card-content-padding">' +
+								'<a id="' + obj[i].id_plan + '" href="#" style="height:100px; background-size: 100% 100%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_tampilan + ');" class="card-content card-content-padding conditioningGeneralPlan">' +
 								'<div class="block fullbodytrainingtitle" style="height: 20px; width: 180px; border: 1px solid; color: white; border-color: black; background-color: black;">' + obj[i].nama_plan + '</div>' +
 								'</a>' +
 								'<div class="card-footer" style="text-align: left;">' +
-								'<h7>' + obj[i].level_plan + '</h7><h7>|</h7><h7>' + obj[i].jenis_program + '</h7><h7>|</h7><h7>' + obj[i].jumlah_hari + 'days/week</h7>' +
+								'<h7>' + obj[i].level_plan + '</h7><h7>|</h7><h7>' + obj[i].jenis_program +
 								'</div>' +
 								'</div>'
 							);
 						}
 					});
-				$$(document).on('click', 'a', function () {
+				$$(document).on('click', '.conditioningGeneralPlan', function () {
 					localStorage.setItem('id_plan', $$(this).attr('id'));
 					app.router.navigate('/general_plan_paket_latihan_conditioning/');
 				});
@@ -458,7 +545,7 @@ var app = new Framework7({
 		url: 'generalplan.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/generalplan.php',
+				app.request.post('http://' + ip + '/phpfile/generalplan.php',
 					function (data) {
 						$$('.generalplanscard').html('');
 						var obj = JSON.parse(data);
@@ -491,7 +578,7 @@ var app = new Framework7({
 		url: 'customplan.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/select_condition.php',
+				app.request.post('http://' + ip + '/phpfile/select_condition.php',
 					{
 						email: localStorage.getItem('email')
 					}, function (data) {
@@ -505,13 +592,12 @@ var app = new Framework7({
 					});
 
 				$$('.cardsMenuCustomPlan').on('click', function () {
-					app.request.post('http://localhost/phpfile/prosesCustomPlan.php', {
+					localStorage.setItem('id_program', $$(this).attr('id'));
+					app.request.post('http://' + ip + '/phpfile/prosesCustomPlan.php', {
 						email: localStorage.getItem('email'),
 						program: $$(this).attr('id')
-
 					}, function (data) {
-
-
+						app.router.navigate('/tampilCustomPlan/');
 					});
 				});
 
@@ -520,6 +606,78 @@ var app = new Framework7({
 
 		}
 	},
+
+	{
+		path: '/tampilCustomPlan/',
+		url: 'tampilCustomPlan.html',
+		on: {
+			pageInit: function (page) {
+				app.request.post('http://' + ip + '/phpfile/selectPorsiCustomPlan.php', {
+					email: localStorage.getItem('email'),
+					program: localStorage.getItem('id_program')
+				},
+					function (data) {
+						if (data != 0) {
+							$$('.canvasPorsiLatihan').html('');
+							var obj = JSON.parse(data);
+							var counter = Object.keys(obj).length;
+							var hari = null;
+							var today = null;
+							for (var i = 0; i < counter; i++) {
+								switch (obj[i].hari_ke) {
+									case '1':
+										hari = 'SENIN';
+										break;
+
+									case '2':
+										hari = 'SELASA';
+										break;
+
+									case '3':
+										hari = 'RABU';
+										break;
+
+									case '4':
+										hari = 'KAMIS';
+										break;
+
+									case '5':
+										hari = 'JUMAT';
+										break;
+
+									case '6':
+										hari = 'SABTU';
+										break;
+
+									case '7':
+										hari = 'MINGGU';
+										break;
+								}
+
+								if (hari != today) {
+									$$('.canvasPorsiLatihan').append(
+										'<div class="block-title block-strong" style="font-size: 13px; border-bottom:solid 2px; border-top:solid 2px; font-weight:bold;">' +
+										hari +
+										'</div >'
+									);
+									today = hari;
+								}
+
+								$$('.canvasPorsiLatihan').append(
+									'<div class="block-title" style="font-size: 11px;">' +
+									'<h2 style="font-size:16px;">' + obj[i].nama_exercise + '</h2>' +
+									'<h5 style="font-size:14px;">' + obj[i].sets + ' sets ' + obj[i].repetisi + 'reps </h5>' +
+									'<a href="#" class="link">Lihat contoh gerakan</a>' +
+									'</div >'
+								);
+							}
+						}
+
+					});
+			}
+		}
+	},
+
 
 	{
 
@@ -533,7 +691,7 @@ var app = new Framework7({
 		url: 'myprofile.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/select_condition.php', {
+				app.request.post('http://' + ip + '/phpfile/select_condition.php', {
 					email: localStorage.getItem('email')
 				},
 					function (data) {
@@ -550,7 +708,7 @@ var app = new Framework7({
 
 							'<div class="item-inner">' +
 							'<div class="item-title">Height</div>' +
-							'<div class="item-after">' + obj[0].berat_badan + '</div>' +
+							'<div class="item-after">' + obj[0].tinggi_badan + '</div>' +
 							'</div>' +
 							'</div>' +
 							'</li>' +
@@ -559,7 +717,7 @@ var app = new Framework7({
 
 							'<div class="item-inner">' +
 							'<div class="item-title">Weight</div>' +
-							'<div class="item-after">' + obj[0].tinggi_badan + '</div>' +
+							'<div class="item-after">' + obj[0].berat_badan + '</div>' +
 							'</div>' +
 							'</div>' +
 							'</li>' +
@@ -601,18 +759,72 @@ var app = new Framework7({
 							'<div class="item-content">' +
 
 							'<div class="item-inner">' +
-							'<div class="item-title">Total fat</div>' +
+							'<div class="item-title">BMR</div>' +
+							'<div class="item-after">' + obj[0].BMR + '</div>' +
+							'</div>' +
+							'</div>' +
+							'</li>' +
+							'<li>' +
+							'<div class="item-content">' +
+
+							'<div class="item-inner">' +
+							'<div class="item-title">Total Fat</div>' +
 							'<div class="item-after">' + obj[0].total_fat + '</div>' +
+							'</div>' +
+							'</div>' +
+							'</li>' +
+							'<li>' +
+							'<div class="item-content">' +
+
+							'<div class="item-inner">' +
+							'<div class="item-title">Kalori Harian</div>' +
+							'<div class="item-after">' + obj[0].kalori_harian + '</div>' +
+							'</div>' +
+							'</div>' +
+							'</li>' +
+							'<li>' +
+							'<div class="item-content">' +
+
+							'<div class="item-inner">' +
+							'<div class="item-title">Karbohidrat Harian</div>' +
+							'<div class="item-after">' + obj[0].karbohidrat_harian + '</div>' +
+							'</div>' +
+							'</div>' +
+							'</li>' +
+							'<li>' +
+							'<div class="item-content">' +
+
+							'<div class="item-inner">' +
+							'<div class="item-title">Protein Harian</div>' +
+							'<div class="item-after">' + obj[0].protein_harian + '</div>' +
+							'</div>' +
+							'</div>' +
+							'</li>' +
+							'<li>' +
+							'<div class="item-content">' +
+
+							'<div class="item-inner">' +
+							'<div class="item-title">Lemak Harian</div>' +
+							'<div class="item-after">' + obj[0].lemak_harian + '</div>' +
 							'</div>' +
 							'</div>' +
 							'</li>' +
 							'</ul>' +
 							'</div>' +
 							'</div>'
+
+
 						);
 					});
 				$$('#btnsetcondition').on('click', function () {
 					app.router.navigate('/setcondition/');
+				});
+
+				$$('.logout').on('click', function () {
+
+					localStorage.removeItem('email');
+					app.router.navigate('/index/');
+
 				});
 
 			}
@@ -625,9 +837,7 @@ var app = new Framework7({
 		url: 'setcondition.html',
 		on: {
 			pageInit: function (e, page) {
-
 				$$('#btnsubmitcondition').on('click', function () {
-
 					var h = document.forms["formSubmitCondition"]["height"].value;
 					if (h == "") {
 						app.dialog.alert("kolom height harus diisi");
@@ -644,7 +854,6 @@ var app = new Framework7({
 						return false;
 					}
 
-
 					var simpan_email = localStorage.getItem('email');
 					var simpan_weight = $$('#weight').val();
 					var simpan_height = $$('#height').val();
@@ -652,9 +861,7 @@ var app = new Framework7({
 					var simpan_bodytype = $$('#bodytype').val();
 					var simpan_activity = $$('#levelaktifitas').val();
 
-
-
-					app.request.post('http://localhost/phpfile/inputcondition.php',
+					app.request.post('http://' + ip + '/phpfile/inputcondition.php',
 						{
 							email: simpan_email,
 							weight: simpan_weight,
@@ -662,16 +869,13 @@ var app = new Framework7({
 							age: simpan_age,
 							bodytype: simpan_bodytype,
 							aktifitas: simpan_activity
-
 						},
 						function (data) {
 							app.dialog.alert(data);
 							app.router.navigate('/informasiKondisi/');
 						});
-
 				});
 			}
-
 		}
 	},
 
@@ -680,7 +884,7 @@ var app = new Framework7({
 		url: 'trapezius-home.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/exercise_trapezius.php',
+				app.request.post('http://' + ip + '/phpfile/exercise_trapezius.php',
 					function (data) {
 						$$('.list').html('');
 						var obj = JSON.parse(data);
@@ -690,7 +894,7 @@ var app = new Framework7({
 								'<ul>' +
 								'<li>' +
 								'<a href="#" class="item-link item-content" style="height: 60px;">' +
-								'<div class="item-media" style="height: 45px; width:40px; border:1px solid #0a0f0f; border-radius: 7px; margin-top:8px; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_exercise + ');"></div>' +
+								'<div class="item-media" style="height: 45px; width:40px; border:1px solid #0a0f0f; border-radius: 7px; margin-top:8px; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_exercise + ');"></div>' +
 								'<div class="item-inner" style="margin-top: 8px;">' +
 								'<div class="item-title-row">' +
 								'<div class="item-title">' + obj[i].nama_exercise + '</div>' +
@@ -712,7 +916,7 @@ var app = new Framework7({
 		url: 'cardio-home.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/exercise_cardio.php',
+				app.request.post('http://' + ip + '/phpfile/exercise_cardio.php',
 					function (data) {
 						$$('.list').html('');
 						var obj = JSON.parse(data);
@@ -722,7 +926,7 @@ var app = new Framework7({
 								'<ul>' +
 								'<li>' +
 								'<a href="#" class="item-link item-content" style="height: 60px;">' +
-								'<div class="item-media" style="height: 45px; width:40px; border:1px solid #0a0f0f; border-radius: 7px; margin-top:8px; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_exercise + ');"></div>' +
+								'<div class="item-media" style="height: 45px; width:40px; border:1px solid #0a0f0f; border-radius: 7px; margin-top:8px; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_exercise + ');"></div>' +
 								'<div class="item-inner" style="margin-top: 8px;">' +
 								'<div class="item-title-row">' +
 								'<div class="item-title">' + obj[i].nama_exercise + '</div>' +
@@ -744,7 +948,7 @@ var app = new Framework7({
 		url: 'abs-home.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/exercise_abs.php',
+				app.request.post('http://' + ip + '/phpfile/exercise_abs.php',
 					function (data) {
 						$$('.list').html('');
 						var obj = JSON.parse(data);
@@ -754,7 +958,7 @@ var app = new Framework7({
 								'<ul>' +
 								'<li>' +
 								'<a href="#" class="item-link item-content" style="height: 60px;">' +
-								'<div class="item-media" style="height: 45px; width:40px; border:1px solid #0a0f0f; border-radius: 7px; margin-top:8px; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_exercise + ');"></div>' +
+								'<div class="item-media" style="height: 45px; width:40px; border:1px solid #0a0f0f; border-radius: 7px; margin-top:8px; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_exercise + ');"></div>' +
 								'<div class="item-inner" style="margin-top: 8px;">' +
 								'<div class="item-title-row">' +
 								'<div class="item-title">' + obj[i].nama_exercise + '</div>' +
@@ -776,7 +980,7 @@ var app = new Framework7({
 		url: 'lowerleg-home.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/exercise_lowerleg.php',
+				app.request.post('http://' + ip + '/phpfile/exercise_lowerleg.php',
 					function (data) {
 						$$('.list').html('');
 						var obj = JSON.parse(data);
@@ -786,7 +990,7 @@ var app = new Framework7({
 								'<ul>' +
 								'<li>' +
 								'<a href="#" class="item-link item-content" style="height: 60px;">' +
-								'<div class="item-media" style="height: 45px; width:40px; border:1px solid #0a0f0f; border-radius: 7px; margin-top:8px; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_exercise + ');"></div>' +
+								'<div class="item-media" style="height: 45px; width:40px; border:1px solid #0a0f0f; border-radius: 7px; margin-top:8px; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_exercise + ');"></div>' +
 								'<div class="item-inner" style="margin-top: 8px;">' +
 								'<div class="item-title-row">' +
 								'<div class="item-title">' + obj[i].nama_exercise + '</div>' +
@@ -808,7 +1012,7 @@ var app = new Framework7({
 		url: 'glutes-home.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/exercise_glutes.php',
+				app.request.post('http://' + ip + '/phpfile/exercise_glutes.php',
 					function (data) {
 						$$('.list').html('');
 						var obj = JSON.parse(data);
@@ -818,7 +1022,7 @@ var app = new Framework7({
 								'<ul>' +
 								'<li>' +
 								'<a href="#" class="item-link item-content" style="height: 60px;">' +
-								'<div class="item-media" style="height: 45px; width:40px; border:1px solid #0a0f0f; border-radius: 7px; margin-top:8px; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_exercise + ');"></div>' +
+								'<div class="item-media" style="height: 45px; width:40px; border:1px solid #0a0f0f; border-radius: 7px; margin-top:8px; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_exercise + ');"></div>' +
 								'<div class="item-inner" style="margin-top: 8px;">' +
 								'<div class="item-title-row">' +
 								'<div class="item-title">' + obj[i].nama_exercise + '</div>' +
@@ -840,7 +1044,7 @@ var app = new Framework7({
 		url: 'upperleg-home.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/exercise_upperleg.php',
+				app.request.post('http://' + ip + '/phpfile/exercise_upperleg.php',
 					function (data) {
 						$$('.list').html('');
 						var obj = JSON.parse(data);
@@ -850,7 +1054,7 @@ var app = new Framework7({
 								'<ul>' +
 								'<li>' +
 								'<a href="#" class="item-link item-content" style="height: 60px;">' +
-								'<div class="item-media" style="height: 45px; width:40px; border:1px solid #0a0f0f; border-radius: 7px; margin-top:8px; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_exercise + ');"></div>' +
+								'<div class="item-media" style="height: 45px; width:40px; border:1px solid #0a0f0f; border-radius: 7px; margin-top:8px; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_exercise + ');"></div>' +
 								'<div class="item-inner" style="margin-top: 8px;">' +
 								'<div class="item-title-row">' +
 								'<div class="item-title">' + obj[i].nama_exercise + '</div>' +
@@ -872,7 +1076,7 @@ var app = new Framework7({
 		url: 'back-home.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/exercise_back.php',
+				app.request.post('http://' + ip + '/phpfile/exercise_back.php',
 					function (data) {
 						$$('.list').html('');
 						var obj = JSON.parse(data);
@@ -882,7 +1086,7 @@ var app = new Framework7({
 								'<ul>' +
 								'<li>' +
 								'<a href="#" class="item-link item-content" style="height: 60px;">' +
-								'<div class="item-media" style="height: 45px; width:40px; border:1px solid #0a0f0f; border-radius: 7px;  margin-top:8px; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_exercise + ');"></div>' +
+								'<div class="item-media" style="height: 45px; width:40px; border:1px solid #0a0f0f; border-radius: 7px;  margin-top:8px; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_exercise + ');"></div>' +
 								'<div class="item-inner" style="margin-top: 8px;">' +
 								'<div class="item-title-row">' +
 								'<div class="item-title">' + obj[i].nama_exercise + '</div>' +
@@ -904,7 +1108,7 @@ var app = new Framework7({
 		url: 'shoulders-home.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/exercise_shoulder.php',
+				app.request.post('http://' + ip + '/phpfile/exercise_shoulder.php',
 					function (data) {
 						$$('.list').html('');
 						var obj = JSON.parse(data);
@@ -913,8 +1117,8 @@ var app = new Framework7({
 							$$('.list').append(
 								'<ul>' +
 								'<li>' +
-								'<a id-"' + obj[i].id_exercise + '" data-href="' + obj[i].url + '" href="#" class="item-link item-content">' +
-								'<div class="item-media" style="height: 45px; width:40px; border:1px solid #0a0f0f; border-radius: 7px; margin-top:8px; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_exercise + ');"></div>' +
+								'<a id="' + obj[i].id_exercise + '" data-href="' + obj[i].url + '" href="#" class="item-link item-content">' +
+								'<div class="item-media" style="height: 45px; width:40px; border:1px solid #0a0f0f; border-radius: 7px; margin-top:8px; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_exercise + ');"></div>' +
 								'<div class="item-inner" style="margin-top: 8px;">' +
 								'<div class="item-title-row">' +
 								'<div class="item-title">' + obj[i].nama_exercise + '</div>' +
@@ -940,7 +1144,7 @@ var app = new Framework7({
 		url: 'chest-home.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/exercise_chest.php',
+				app.request.post('http://' + ip + '/phpfile/exercise_chest.php',
 					function (data) {
 						$$('.list').html('');
 						var obj = JSON.parse(data);
@@ -950,7 +1154,7 @@ var app = new Framework7({
 								'<ul>' +
 								'<li>' +
 								'<a href="#" class="item-link item-content" style="height: 60px;">' +
-								'<div class="item-media" style="height: 45px; width:40px; border:1px solid #0a0f0f; border-radius: 7px;  margin-top:8px; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_exercise + ');"></div>' +
+								'<div class="item-media" style="height: 45px; width:40px; border:1px solid #0a0f0f; border-radius: 7px;  margin-top:8px; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_exercise + ');"></div>' +
 								'<div class="item-inner" style="margin-top: 8px;">' +
 								'<div class="item-title-row">' +
 								'<div class="item-title">' + obj[i].nama_exercise + '</div>' +
@@ -972,7 +1176,7 @@ var app = new Framework7({
 		url: 'forearm-home.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/exercise_forearm.php',
+				app.request.post('http://' + ip + '/phpfile/exercise_forearm.php',
 					function (data) {
 						$$('.list').html('');
 						var obj = JSON.parse(data);
@@ -982,7 +1186,7 @@ var app = new Framework7({
 								'<ul>' +
 								'<li>' +
 								'<a href="#" class="item-link item-content" style="height: 60px;">' +
-								'<div class="item-media" style="height: 45px; width:40px; border:1px solid #0a0f0f; border-radius: 7px; margin-top:8px; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_exercise + ');"></div>' +
+								'<div class="item-media" style="height: 45px; width:40px; border:1px solid #0a0f0f; border-radius: 7px; margin-top:8px; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_exercise + ');"></div>' +
 								'<div class="item-inner" style="margin-top: 8px;">' +
 								'<div class="item-title-row">' +
 								'<div class="item-title">' + obj[i].nama_exercise + '</div>' +
@@ -1004,7 +1208,7 @@ var app = new Framework7({
 		url: 'triceps-home.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/exercise_triceps.php',
+				app.request.post('http://' + ip + '/phpfile/exercise_triceps.php',
 					function (data) {
 						$$('.list').html('');
 						var obj = JSON.parse(data);
@@ -1014,7 +1218,7 @@ var app = new Framework7({
 								'<ul>' +
 								'<li>' +
 								'<a id="' + obj[i].id_exercise + '" data-href="' + obj[i].url + '" href="#" class="item-link item-content"  style="height: 60px;">' +
-								'<div class="item-media" style="height: 45px; width:40px; border:1px solid #0a0f0f; border-radius: 7px; margin-top:8px; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_exercise + ');"></div>' +
+								'<div class="item-media" style="height: 45px; width:40px; border:1px solid #0a0f0f; border-radius: 7px; margin-top:8px; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_exercise + ');"></div>' +
 								'<div class="item-inner" style="margin-top: 8px;">' +
 								'<div class="item-title-row">' +
 								'<div class="item-title">' + obj[i].nama_exercise + '</div>' +
@@ -1040,7 +1244,7 @@ var app = new Framework7({
 		url: 'biceps-home.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/exercise_biceps.php',
+				app.request.post('http://' + ip + '/phpfile/exercise_biceps.php',
 					function (data) {
 						$$('.list').html('');
 						var obj = JSON.parse(data);
@@ -1050,7 +1254,7 @@ var app = new Framework7({
 								'<ul>' +
 								'<li>' +
 								'<a id="' + obj[i].id_exercise + '" data-href="' + obj[i].url + '" href="#" class="item-link item-content" style="height: 60px;">' +
-								'<div class="item-media" style="height: 45px; width:40px; border:1px solid #0a0f0f; border-radius: 7px; margin-top:8px; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_exercise + ');"></div>' +
+								'<div class="item-media" style="height: 45px; width:40px; border:1px solid #0a0f0f; border-radius: 7px; margin-top:8px; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_exercise + ');"></div>' +
 								'<div class="item-inner" style="margin-top: 8px;">' +
 								'<div class="item-title-row">' +
 								'<div class="item-title">' + obj[i].nama_exercise + '</div>' +
@@ -1081,16 +1285,17 @@ var app = new Framework7({
 	{
 		path: '/index/',
 		url: 'index.html',
-		// on:{
-		// 	pageInit:function(e,page){
-		// 		if(localStorage.getItem('email')!=null){
-		// 			app.dialog.alert('bisa');
-		// 			app.router.navigate('/home/');
-		// 		}
+		on: {
+			pageInit: function (e, page) {
+
+				// 		if(localStorage.getItem('email')!=null){
+				// 			app.dialog.alert('bisa');
+				app.router.navigate('/home/');
+				// 		}
 
 
-		// 	}
-		// }
+			}
+		}
 	},
 
 	{
@@ -1106,12 +1311,18 @@ var app = new Framework7({
 					}
 				});
 
+				$$('.cardshortcut1').on('click', function () {
 
-				$$('#logOut').on('click', function () {
-					localStorage.removeItem('email');
-					app.router.navigate('/index/');
-
+					app.router.navigate('/cuttingGeneralPlan/');
 				});
+
+				$$('.cardshortcut2').on('click', function () {
+
+					app.router.navigate('/BulkingGeneralPlan/');
+				});
+
+
+
 			}
 		}
 
@@ -1132,7 +1343,17 @@ var app = new Framework7({
 
 					var a = $$('#email').val();
 					var b = $$('#password').val();
-					app.request.post('http://localhost/phpfile/login.php', {
+
+					if (a == "") {
+						app.dialog.alert("Kolom email harus diisi");
+						return false;
+					}
+					if (b == "") {
+						app.dialog.alert("Kolom password harus diisi");
+						return false;
+					}
+
+					app.request.post('http://' + ip + '/phpfile/login.php', {
 						email: a,
 						password: b
 					}, function (data) {
@@ -1142,16 +1363,9 @@ var app = new Framework7({
 
 							notificationFull.open();
 							app.router.navigate('/home/');
-							// app.dialog.alert(localStorage.getItem('email'));
-
-
 						} else {
 							app.dialog.alert('Email atau Password anda salah');
 						}
-						if (data == 'gagal') {
-							app.dialog.alert('Anda belum memasukan email atau password');
-						}
-
 					});
 				});
 
@@ -1188,10 +1402,14 @@ var app = new Framework7({
 						return false;
 					}
 
+					$$('#btnBack').on('click', function () {
+						app.router.navigate('/index/');
+					});
+
 					app.panel.close();
 					//page.router.navigate('/product/');
 					var x = new FormData($$(".form-ajax-submit")[0]);
-					app.request.post('http://localhost/phpfile/signup.php', x, function (data) {
+					app.request.post('http://' + ip + '/phpfile/signup.php', x, function (data) {
 						app.dialog.alert('Anda telah terdafar');
 						app.router.navigate('/index/');
 					});
@@ -1207,7 +1425,7 @@ var app = new Framework7({
 		url: 'dumbbellAlternateHammerCurl.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
 					simpan_id: localStorage.getItem('id_exercise')
 				},
 					function (data) {
@@ -1216,7 +1434,7 @@ var app = new Framework7({
 						var counter = Object.keys(obj).length;
 						for (var i = 0; i < counter; i++) {
 							$$('.canvasExercise').append(
-								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
 								'<a href="#">Link Youtube</a>' +
 								'</div>' +
 								'<div class="block-title">' +
@@ -1248,7 +1466,7 @@ var app = new Framework7({
 		url: 'dumbbellAlternateBicepCurl.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
 					simpan_id: localStorage.getItem('id_exercise')
 				},
 					function (data) {
@@ -1257,7 +1475,7 @@ var app = new Framework7({
 						var counter = Object.keys(obj).length;
 						for (var i = 0; i < counter; i++) {
 							$$('.canvasExercise').append(
-								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
 								'<a href="#">Link Youtube</a>' +
 								'</div>' +
 								'<div class="block-title">' +
@@ -1289,7 +1507,7 @@ var app = new Framework7({
 		url: 'dumbbellBicepsCurl.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
 					simpan_id: localStorage.getItem('id_exercise')
 				},
 					function (data) {
@@ -1298,7 +1516,7 @@ var app = new Framework7({
 						var counter = Object.keys(obj).length;
 						for (var i = 0; i < counter; i++) {
 							$$('.canvasExercise').append(
-								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
 								'<a href="#">Link Youtube</a>' +
 								'</div>' +
 								'<div class="block-title">' +
@@ -1330,7 +1548,7 @@ var app = new Framework7({
 		url: 'dumbbellInclineCurl.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
 					simpan_id: localStorage.getItem('id_exercise')
 				},
 					function (data) {
@@ -1339,7 +1557,7 @@ var app = new Framework7({
 						var counter = Object.keys(obj).length;
 						for (var i = 0; i < counter; i++) {
 							$$('.canvasExercise').append(
-								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
 								'<a href="#">Link Youtube</a>' +
 								'</div>' +
 								'<div class="block-title">' +
@@ -1371,7 +1589,7 @@ var app = new Framework7({
 		url: 'dumbbellConcentrationCurl.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
 					simpan_id: localStorage.getItem('id_exercise')
 				},
 					function (data) {
@@ -1380,7 +1598,7 @@ var app = new Framework7({
 						var counter = Object.keys(obj).length;
 						for (var i = 0; i < counter; i++) {
 							$$('.canvasExercise').append(
-								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
 								'<a href="#">Link Youtube</a>' +
 								'</div>' +
 								'<div class="block-title">' +
@@ -1412,7 +1630,7 @@ var app = new Framework7({
 		url: 'barbellCurl.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
 					simpan_id: localStorage.getItem('id_exercise')
 				},
 					function (data) {
@@ -1421,7 +1639,7 @@ var app = new Framework7({
 						var counter = Object.keys(obj).length;
 						for (var i = 0; i < counter; i++) {
 							$$('.canvasExercise').append(
-								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
 								'<a href="#">Link Youtube</a>' +
 								'</div>' +
 								'<div class="block-title">' +
@@ -1453,7 +1671,7 @@ var app = new Framework7({
 		url: 'EzBarCurl.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
 					simpan_id: localStorage.getItem('id_exercise')
 				},
 					function (data) {
@@ -1462,7 +1680,7 @@ var app = new Framework7({
 						var counter = Object.keys(obj).length;
 						for (var i = 0; i < counter; i++) {
 							$$('.canvasExercise').append(
-								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
 								'<a href="#">Link Youtube</a>' +
 								'</div>' +
 								'<div class="block-title">' +
@@ -1494,7 +1712,7 @@ var app = new Framework7({
 		url: 'barbellWideCurl.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
 					simpan_id: localStorage.getItem('id_exercise')
 				},
 					function (data) {
@@ -1503,7 +1721,7 @@ var app = new Framework7({
 						var counter = Object.keys(obj).length;
 						for (var i = 0; i < counter; i++) {
 							$$('.canvasExercise').append(
-								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
 								'<a href="#">Link Youtube</a>' +
 								'</div>' +
 								'<div class="block-title">' +
@@ -1535,7 +1753,7 @@ var app = new Framework7({
 		url: 'barbellCloseGripCurl.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
 					simpan_id: localStorage.getItem('id_exercise')
 				},
 					function (data) {
@@ -1544,7 +1762,7 @@ var app = new Framework7({
 						var counter = Object.keys(obj).length;
 						for (var i = 0; i < counter; i++) {
 							$$('.canvasExercise').append(
-								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
 								'<a href="#">Link Youtube</a>' +
 								'</div>' +
 								'<div class="block-title">' +
@@ -1576,7 +1794,7 @@ var app = new Framework7({
 		url: 'cableCurl.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
 					simpan_id: localStorage.getItem('id_exercise')
 				},
 					function (data) {
@@ -1585,7 +1803,7 @@ var app = new Framework7({
 						var counter = Object.keys(obj).length;
 						for (var i = 0; i < counter; i++) {
 							$$('.canvasExercise').append(
-								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
 								'<a href="#">Link Youtube</a>' +
 								'</div>' +
 								'<div class="block-title">' +
@@ -1618,7 +1836,7 @@ var app = new Framework7({
 		url: 'dumbbellSeatedCurl.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
 					simpan_id: localStorage.getItem('id_exercise')
 				},
 					function (data) {
@@ -1627,7 +1845,7 @@ var app = new Framework7({
 						var counter = Object.keys(obj).length;
 						for (var i = 0; i < counter; i++) {
 							$$('.canvasExercise').append(
-								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
 								'<a href="#">Link Youtube</a>' +
 								'</div>' +
 								'<div class="block-title">' +
@@ -1659,7 +1877,7 @@ var app = new Framework7({
 		url: 'dumbbellSpiderCurl.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
 					simpan_id: localStorage.getItem('id_exercise')
 				},
 					function (data) {
@@ -1668,7 +1886,7 @@ var app = new Framework7({
 						var counter = Object.keys(obj).length;
 						for (var i = 0; i < counter; i++) {
 							$$('.canvasExercise').append(
-								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
 								'<a href="#">Link Youtube</a>' +
 								'</div>' +
 								'<div class="block-title">' +
@@ -1700,7 +1918,7 @@ var app = new Framework7({
 		url: 'tricepsPushdownVBar.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
 					simpan_id: localStorage.getItem('id_exercise')
 				},
 					function (data) {
@@ -1709,7 +1927,7 @@ var app = new Framework7({
 						var counter = Object.keys(obj).length;
 						for (var i = 0; i < counter; i++) {
 							$$('.canvasExercise').append(
-								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
 								'<a href="#">Link Youtube</a>' +
 								'</div>' +
 								'<div class="block-title">' +
@@ -1741,7 +1959,7 @@ var app = new Framework7({
 		url: 'dumbbellStandingOneArmTricepsExtension.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
 					simpan_id: localStorage.getItem('id_exercise')
 				},
 					function (data) {
@@ -1750,7 +1968,7 @@ var app = new Framework7({
 						var counter = Object.keys(obj).length;
 						for (var i = 0; i < counter; i++) {
 							$$('.canvasExercise').append(
-								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
 								'<a href="#">Link Youtube</a>' +
 								'</div>' +
 								'<div class="block-title">' +
@@ -1782,7 +2000,7 @@ var app = new Framework7({
 		url: 'barbellStandingTricepsExtension.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
 					simpan_id: localStorage.getItem('id_exercise')
 				},
 					function (data) {
@@ -1791,7 +2009,7 @@ var app = new Framework7({
 						var counter = Object.keys(obj).length;
 						for (var i = 0; i < counter; i++) {
 							$$('.canvasExercise').append(
-								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
 								'<a href="#">Link Youtube</a>' +
 								'</div>' +
 								'<div class="block-title">' +
@@ -1823,7 +2041,7 @@ var app = new Framework7({
 		url: 'cableRopeTricepsPushdown.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
 					simpan_id: localStorage.getItem('id_exercise')
 				},
 					function (data) {
@@ -1832,7 +2050,7 @@ var app = new Framework7({
 						var counter = Object.keys(obj).length;
 						for (var i = 0; i < counter; i++) {
 							$$('.canvasExercise').append(
-								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
 								'<a href="#">Link Youtube</a>' +
 								'</div>' +
 								'<div class="block-title">' +
@@ -1864,7 +2082,7 @@ var app = new Framework7({
 		url: 'dumbbellTricepKickback.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
 					simpan_id: localStorage.getItem('id_exercise')
 				},
 					function (data) {
@@ -1873,7 +2091,7 @@ var app = new Framework7({
 						var counter = Object.keys(obj).length;
 						for (var i = 0; i < counter; i++) {
 							$$('.canvasExercise').append(
-								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
 								'<a href="#">Link Youtube</a>' +
 								'</div>' +
 								'<div class="block-title">' +
@@ -1905,7 +2123,7 @@ var app = new Framework7({
 		url: 'singleBenchDip.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
 					simpan_id: localStorage.getItem('id_exercise')
 				},
 					function (data) {
@@ -1914,7 +2132,7 @@ var app = new Framework7({
 						var counter = Object.keys(obj).length;
 						for (var i = 0; i < counter; i++) {
 							$$('.canvasExercise').append(
-								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
 								'<a href="#">Link Youtube</a>' +
 								'</div>' +
 								'<div class="block-title">' +
@@ -1946,7 +2164,7 @@ var app = new Framework7({
 		url: 'cableRopeUnderheadTricepsExtension.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
 					simpan_id: localStorage.getItem('id_exercise')
 				},
 					function (data) {
@@ -1955,7 +2173,7 @@ var app = new Framework7({
 						var counter = Object.keys(obj).length;
 						for (var i = 0; i < counter; i++) {
 							$$('.canvasExercise').append(
-								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
 								'<a href="#">Link Youtube</a>' +
 								'</div>' +
 								'<div class="block-title">' +
@@ -1987,7 +2205,7 @@ var app = new Framework7({
 		url: 'closeTricepsPushup.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
 					simpan_id: localStorage.getItem('id_exercise')
 				},
 					function (data) {
@@ -1996,7 +2214,7 @@ var app = new Framework7({
 						var counter = Object.keys(obj).length;
 						for (var i = 0; i < counter; i++) {
 							$$('.canvasExercise').append(
-								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
 								'<a href="#">Link Youtube</a>' +
 								'</div>' +
 								'<div class="block-title">' +
@@ -2028,7 +2246,7 @@ var app = new Framework7({
 		url: 'dumbbellLyingSupineTwoArmTricepsExtension.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
 					simpan_id: localStorage.getItem('id_exercise')
 				},
 					function (data) {
@@ -2037,7 +2255,7 @@ var app = new Framework7({
 						var counter = Object.keys(obj).length;
 						for (var i = 0; i < counter; i++) {
 							$$('.canvasExercise').append(
-								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
 								'<a href="#">Link Youtube</a>' +
 								'</div>' +
 								'<div class="block-title">' +
@@ -2069,7 +2287,7 @@ var app = new Framework7({
 		url: 'dumbbellLateralRaise.html',
 		on: {
 			pageInit: function (page) {
-				app.request.post('http://localhost/phpfile/selectTampilanLatihan.php', {
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
 					simpan_id: localStorage.getItem('id_exercise')
 				},
 					function (data) {
@@ -2078,7 +2296,7 @@ var app = new Framework7({
 						var counter = Object.keys(obj).length;
 						for (var i = 0; i < counter; i++) {
 							$$('.canvasExercise').append(
-								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://localhost/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
 								'<a href="#">Link Youtube</a>' +
 								'</div>' +
 								'<div class="block-title">' +
@@ -2110,7 +2328,37 @@ var app = new Framework7({
 		url: 'dumbbellShoulderPress.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToShouldersHome').on('click', function () {
+					app.router.navigate('/shoulders-home/');
+				});
 			}
 		}
 
@@ -2122,7 +2370,36 @@ var app = new Framework7({
 		url: 'dumbbellFrontRaise.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToShouldersHome').on('click', function () {
+					app.router.navigate('/shoulders-home/');
+				});
 			}
 		}
 
@@ -2134,7 +2411,36 @@ var app = new Framework7({
 		url: 'DumbbellArnoldPress.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToShouldersHome').on('click', function () {
+					app.router.navigate('/shoulders-home/');
+				});
 			}
 		}
 
@@ -2146,7 +2452,36 @@ var app = new Framework7({
 		url: 'dumbbellStandingPress.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToShouldersHome').on('click', function () {
+					app.router.navigate('/shoulders-home/');
+				});
 			}
 		}
 
@@ -2158,7 +2493,36 @@ var app = new Framework7({
 		url: 'barbbellShoulderPress.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToShouldersHome').on('click', function () {
+					app.router.navigate('/shoulders-home/');
+				});
 			}
 		}
 
@@ -2170,7 +2534,36 @@ var app = new Framework7({
 		url: 'barbbellUpRightRow.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToShouldersHome').on('click', function () {
+					app.router.navigate('/shoulders-home/');
+				});
 			}
 		}
 
@@ -2182,7 +2575,36 @@ var app = new Framework7({
 		url: 'barbbellStandingMilitaryPress.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToShouldersHome').on('click', function () {
+					app.router.navigate('/shoulders-home/');
+				});
 			}
 		}
 
@@ -2194,7 +2616,36 @@ var app = new Framework7({
 		url: 'dumbbellBentOverDeltRaise.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToShouldersHome').on('click', function () {
+					app.router.navigate('/shoulders-home/');
+				});
 			}
 		}
 
@@ -2206,7 +2657,36 @@ var app = new Framework7({
 		url: 'dumbbellUpRightRow.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToShouldersHome').on('click', function () {
+					app.router.navigate('/shoulders-home/');
+				});
 			}
 		}
 
@@ -2218,7 +2698,36 @@ var app = new Framework7({
 		url: 'dumbbellReverseFlyes.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToShouldersHome').on('click', function () {
+					app.router.navigate('/shoulders-home/');
+				});
 			}
 		}
 
@@ -2230,7 +2739,36 @@ var app = new Framework7({
 		url: 'barbbellFrontRaise.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToShouldersHome').on('click', function () {
+					app.router.navigate('/shoulders-home/');
+				});
 			}
 		}
 
@@ -2242,7 +2780,36 @@ var app = new Framework7({
 		url: 'dumbbellSeatedSideLateralRaise.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToShouldersHome').on('click', function () {
+					app.router.navigate('/shoulders-home/');
+				});
 			}
 		}
 
@@ -2254,7 +2821,36 @@ var app = new Framework7({
 		url: 'SmithMachineOverheadShoulderPress.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToShouldersHome').on('click', function () {
+					app.router.navigate('/shoulders-home/');
+				});
 			}
 		}
 
@@ -2266,7 +2862,36 @@ var app = new Framework7({
 		url: 'cableUpRightRow.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToShouldersHome').on('click', function () {
+					app.router.navigate('/shoulders-home/');
+				});
 			}
 		}
 
@@ -2278,7 +2903,36 @@ var app = new Framework7({
 		url: 'cableLateralRaise.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToShouldersHome').on('click', function () {
+					app.router.navigate('/shoulders-home/');
+				});
 			}
 		}
 
@@ -2290,7 +2944,36 @@ var app = new Framework7({
 		url: 'cableFrontRaise.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToShouldersHome').on('click', function () {
+					app.router.navigate('/shoulders-home/');
+				});
 			}
 		}
 
@@ -2302,7 +2985,36 @@ var app = new Framework7({
 		url: 'barbbellPushPress.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToShouldersHome').on('click', function () {
+					app.router.navigate('/shoulders-home/');
+				});
 			}
 		}
 
@@ -2314,7 +3026,36 @@ var app = new Framework7({
 		url: 'dumbbellFrontTwoRaise.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToShouldersHome').on('click', function () {
+					app.router.navigate('/shoulders-home/');
+				});
 			}
 		}
 
@@ -2326,7 +3067,36 @@ var app = new Framework7({
 		url: 'weightPlateFrontRaise.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToShouldersHome').on('click', function () {
+					app.router.navigate('/shoulders-home/');
+				});
 			}
 		}
 
@@ -2338,7 +3108,36 @@ var app = new Framework7({
 		url: 'cableStandingReverseCurl.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToForearmHome').on('click', function () {
+					app.router.navigate('/forearm-home/');
+				});
 			}
 		}
 
@@ -2350,7 +3149,36 @@ var app = new Framework7({
 		url: 'dumbbellPalmsUpWristCurlOverABench.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToForearmHome').on('click', function () {
+					app.router.navigate('/forearm-home/');
+				});
 			}
 		}
 
@@ -2362,7 +3190,36 @@ var app = new Framework7({
 		url: 'dumbbellPalmsDownWristCurlOverABench.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToForearmHome').on('click', function () {
+					app.router.navigate('/forearm-home/');
+				});
 			}
 		}
 
@@ -2374,7 +3231,36 @@ var app = new Framework7({
 		url: 'barbellReverseCurl.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToForearmHome').on('click', function () {
+					app.router.navigate('/forearm-home/');
+				});
 			}
 		}
 
@@ -2386,7 +3272,36 @@ var app = new Framework7({
 		url: 'barbellSeatedPalmsUpWristCurl.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToForearmHome').on('click', function () {
+					app.router.navigate('/forearm-home/');
+				});
 			}
 		}
 
@@ -2398,7 +3313,36 @@ var app = new Framework7({
 		url: 'barbellSeatedPalmsDownWristCurl.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToForearmHome').on('click', function () {
+					app.router.navigate('/forearm-home/');
+				});
 			}
 		}
 
@@ -2410,7 +3354,36 @@ var app = new Framework7({
 		url: 'barbellPalmsUpWristCurlOverABench.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToForearmHome').on('click', function () {
+					app.router.navigate('/forearm-home/');
+				});
 			}
 		}
 
@@ -2422,7 +3395,36 @@ var app = new Framework7({
 		url: 'barbellPalmsDownWristCurlOverABench.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToForearmHome').on('click', function () {
+					app.router.navigate('/forearm-home/');
+				});
 			}
 		}
 
@@ -2434,7 +3436,36 @@ var app = new Framework7({
 		url: 'cableWristCurl.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToForearmHome').on('click', function () {
+					app.router.navigate('/forearm-home/');
+				});
 			}
 		}
 
@@ -2446,7 +3477,36 @@ var app = new Framework7({
 		url: 'barbellReversePreacherCurls.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToForearmHome').on('click', function () {
+					app.router.navigate('/forearm-home/');
+				});
 			}
 		}
 
@@ -2458,7 +3518,36 @@ var app = new Framework7({
 		url: 'dumbbellSeatedPalmsDownWristCurl.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToForearmHome').on('click', function () {
+					app.router.navigate('/forearm-home/');
+				});
 			}
 		}
 
@@ -2470,7 +3559,36 @@ var app = new Framework7({
 		url: 'dumbbellSeatedPalmsUpWristCurl.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToForearmHome').on('click', function () {
+					app.router.navigate('/forearm-home/');
+				});
 			}
 		}
 
@@ -2482,7 +3600,36 @@ var app = new Framework7({
 		url: 'barbellBenchPress.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToChestHome').on('click', function () {
+					app.router.navigate('/chest-home/');
+				});
 			}
 		}
 
@@ -2494,7 +3641,36 @@ var app = new Framework7({
 		url: 'barbellInclineBenchPress.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToChestHome').on('click', function () {
+					app.router.navigate('/chest-home/');
+				});
 			}
 		}
 
@@ -2506,7 +3682,36 @@ var app = new Framework7({
 		url: 'dumbbellBenchPress.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToChestHome').on('click', function () {
+					app.router.navigate('/chest-home/');
+				});
 			}
 		}
 
@@ -2518,7 +3723,36 @@ var app = new Framework7({
 		url: 'dumbbellInclineBenchPress.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToChestHome').on('click', function () {
+					app.router.navigate('/chest-home/');
+				});
 			}
 		}
 
@@ -2530,7 +3764,36 @@ var app = new Framework7({
 		url: 'dumbbelIFly.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToChestHome').on('click', function () {
+					app.router.navigate('/chest-home/');
+				});
 			}
 		}
 
@@ -2542,7 +3805,36 @@ var app = new Framework7({
 		url: 'dumbbellInclineFly.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToChestHome').on('click', function () {
+					app.router.navigate('/chest-home/');
+				});
 			}
 		}
 
@@ -2554,7 +3846,36 @@ var app = new Framework7({
 		url: 'barbellDeclineBenchPress.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToChestHome').on('click', function () {
+					app.router.navigate('/chest-home/');
+				});
 			}
 		}
 
@@ -2566,7 +3887,36 @@ var app = new Framework7({
 		url: 'dumbbellDeclineBenchPress.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToChestHome').on('click', function () {
+					app.router.navigate('/chest-home/');
+				});
 			}
 		}
 
@@ -2578,7 +3928,36 @@ var app = new Framework7({
 		url: 'machineFly.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToChestHome').on('click', function () {
+					app.router.navigate('/chest-home/');
+				});
 			}
 		}
 
@@ -2591,7 +3970,36 @@ var app = new Framework7({
 		url: 'cableCrossOver.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToChestHome').on('click', function () {
+					app.router.navigate('/chest-home/');
+				});
 			}
 		}
 
@@ -2603,7 +4011,36 @@ var app = new Framework7({
 		url: 'benchPressMachine.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToChestHome').on('click', function () {
+					app.router.navigate('/chest-home/');
+				});
 			}
 		}
 
@@ -2615,7 +4052,36 @@ var app = new Framework7({
 		url: 'machineInclineChestPress.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToChestHome').on('click', function () {
+					app.router.navigate('/chest-home/');
+				});
 			}
 		}
 
@@ -2627,7 +4093,36 @@ var app = new Framework7({
 		url: 'smithMachineBenchPress.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToChestHome').on('click', function () {
+					app.router.navigate('/chest-home/');
+				});
 			}
 		}
 
@@ -2639,7 +4134,36 @@ var app = new Framework7({
 		url: 'dumbbellDeclineFly.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToChestHome').on('click', function () {
+					app.router.navigate('/chest-home/');
+				});
 			}
 		}
 
@@ -2651,7 +4175,36 @@ var app = new Framework7({
 		url: 'dumbbellStraightArmPullover.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToChestHome').on('click', function () {
+					app.router.navigate('/chest-home/');
+				});
 			}
 		}
 
@@ -2663,7 +4216,36 @@ var app = new Framework7({
 		url: 'cableLowerChestRaise.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToChestHome').on('click', function () {
+					app.router.navigate('/chest-home/');
+				});
 			}
 		}
 
@@ -2675,7 +4257,36 @@ var app = new Framework7({
 		url: 'ButterflyMachine.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToChestHome').on('click', function () {
+					app.router.navigate('/chest-home/');
+				});
 			}
 		}
 
@@ -2687,7 +4298,36 @@ var app = new Framework7({
 		url: 'smithMachineInclineBenchPress.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToChestHome').on('click', function () {
+					app.router.navigate('/chest-home/');
+				});
 			}
 		}
 
@@ -2699,7 +4339,36 @@ var app = new Framework7({
 		url: 'dumbbellHammerGripInclineBenchPress.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToChestHome').on('click', function () {
+					app.router.navigate('/chest-home/');
+				});
 			}
 		}
 
@@ -2711,7 +4380,36 @@ var app = new Framework7({
 		url: 'platePress.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToChestHome').on('click', function () {
+					app.router.navigate('/chest-home/');
+				});
 			}
 		}
 
@@ -2723,7 +4421,36 @@ var app = new Framework7({
 		url: 'leverageChestPress.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToChestHome').on('click', function () {
+					app.router.navigate('/chest-home/');
+				});
 			}
 		}
 
@@ -2735,7 +4462,36 @@ var app = new Framework7({
 		url: 'pushUp.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToChestHome').on('click', function () {
+					app.router.navigate('/chest-home/');
+				});
 			}
 		}
 
@@ -2747,7 +4503,36 @@ var app = new Framework7({
 		url: 'benchPushups.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToChestHome').on('click', function () {
+					app.router.navigate('/chest-home/');
+				});
 			}
 		}
 
@@ -2759,7 +4544,36 @@ var app = new Framework7({
 		url: 'wideGripLatPulldown.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToBackHome').on('click', function () {
+					app.router.navigate('/back-home/');
+				});
 			}
 		}
 
@@ -2772,7 +4586,36 @@ var app = new Framework7({
 		url: 'wideGripRearPulldowns.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToBackHome').on('click', function () {
+					app.router.navigate('/back-home/');
+				});
 			}
 		}
 
@@ -2784,7 +4627,36 @@ var app = new Framework7({
 		url: 'closeGripFrontlatPulldown.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToBackHome').on('click', function () {
+					app.router.navigate('/back-home/');
+				});
 			}
 		}
 
@@ -2796,7 +4668,36 @@ var app = new Framework7({
 		url: 'cableUnderhandPullDown.html',
 		on: {
 			pageInit: function (page) {
-				app.dialog.alert("hai");
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToBackHome').on('click', function () {
+					app.router.navigate('/back-home/');
+				});
 			}
 		}
 
@@ -2808,7 +4709,36 @@ var app = new Framework7({
 		url: 'cableVBarPullDown.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToBackHome').on('click', function () {
+					app.router.navigate('/back-home/');
+				});
 			}
 		}
 
@@ -2820,7 +4750,36 @@ var app = new Framework7({
 		url: 'PullUps.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToBackHome').on('click', function () {
+					app.router.navigate('/back-home/');
+				});
 			}
 		}
 
@@ -2832,7 +4791,36 @@ var app = new Framework7({
 		url: 'cableSeatedRow.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToBackHome').on('click', function () {
+					app.router.navigate('/back-home/');
+				});
 			}
 		}
 
@@ -2844,7 +4832,36 @@ var app = new Framework7({
 		url: 'dumbbellOneArmRow.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToBackHome').on('click', function () {
+					app.router.navigate('/back-home/');
+				});
 			}
 		}
 
@@ -2856,7 +4873,36 @@ var app = new Framework7({
 		url: 'dumbbellBentOverRow.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToBackHome').on('click', function () {
+					app.router.navigate('/back-home/');
+				});
 			}
 		}
 
@@ -2868,7 +4914,36 @@ var app = new Framework7({
 		url: 'barbellBentOverRow.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToBackHome').on('click', function () {
+					app.router.navigate('/back-home/');
+				});
 			}
 		}
 
@@ -2880,7 +4955,36 @@ var app = new Framework7({
 		url: 'ChinUp.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToBackHome').on('click', function () {
+					app.router.navigate('/back-home/');
+				});
 			}
 		}
 
@@ -2892,7 +4996,36 @@ var app = new Framework7({
 		url: 'barbellDeadlift.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToBackHome').on('click', function () {
+					app.router.navigate('/back-home/');
+				});
 			}
 		}
 
@@ -2904,7 +5037,36 @@ var app = new Framework7({
 		url: 'backExtensions.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToBackHome').on('click', function () {
+					app.router.navigate('/back-home/');
+				});
 			}
 		}
 
@@ -2916,7 +5078,36 @@ var app = new Framework7({
 		url: 'TBarRow.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToBackHome').on('click', function () {
+					app.router.navigate('/back-home/');
+				});
 			}
 		}
 
@@ -2928,7 +5119,36 @@ var app = new Framework7({
 		url: 'barbellRomanianDeadlift.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToBackHome').on('click', function () {
+					app.router.navigate('/back-home/');
+				});
 			}
 		}
 
@@ -2940,7 +5160,36 @@ var app = new Framework7({
 		url: 'cableStraightArmPushDown.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToBackHome').on('click', function () {
+					app.router.navigate('/back-home/');
+				});
 			}
 		}
 
@@ -2952,7 +5201,36 @@ var app = new Framework7({
 		url: 'dumbbellDeadlift.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToBackHome').on('click', function () {
+					app.router.navigate('/back-home/');
+				});
 			}
 		}
 
@@ -2964,7 +5242,36 @@ var app = new Framework7({
 		url: 'barbellReverseGripBentOverRow.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToBackHome').on('click', function () {
+					app.router.navigate('/back-home/');
+				});
 			}
 		}
 
@@ -2976,7 +5283,36 @@ var app = new Framework7({
 		url: 'seatedMachineRow.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToBackHome').on('click', function () {
+					app.router.navigate('/back-home/');
+				});
 			}
 		}
 
@@ -2988,7 +5324,36 @@ var app = new Framework7({
 		url: 'machineLatPullDown.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToBackHome').on('click', function () {
+					app.router.navigate('/back-home/');
+				});
 			}
 		}
 
@@ -3000,7 +5365,36 @@ var app = new Framework7({
 		url: 'dumbbellSquat.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToUpperlegHome').on('click', function () {
+					app.router.navigate('/upperleg-home/');
+				});
 			}
 		}
 
@@ -3012,7 +5406,36 @@ var app = new Framework7({
 		url: 'barbellSquat.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToUpperlegHome').on('click', function () {
+					app.router.navigate('/upperleg-home/');
+				});
 			}
 		}
 
@@ -3024,7 +5447,36 @@ var app = new Framework7({
 		url: 'dumbbellLunges.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToUpperlegHome').on('click', function () {
+					app.router.navigate('/upperleg-home/');
+				});
 			}
 		}
 
@@ -3036,7 +5488,36 @@ var app = new Framework7({
 		url: 'barbellLunge.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToUpperlegHome').on('click', function () {
+					app.router.navigate('/upperleg-home/');
+				});
 			}
 		}
 
@@ -3048,7 +5529,36 @@ var app = new Framework7({
 		url: 'prisonerSquat.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToUpperlegHome').on('click', function () {
+					app.router.navigate('/upperleg-home/');
+				});
 			}
 		}
 
@@ -3060,7 +5570,36 @@ var app = new Framework7({
 		url: 'bodyweightLunge.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToUpperlegHome').on('click', function () {
+					app.router.navigate('/upperleg-home/');
+				});
 			}
 		}
 
@@ -3072,7 +5611,36 @@ var app = new Framework7({
 		url: 'barbellFrontSquat.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToUpperlegHome').on('click', function () {
+					app.router.navigate('/upperleg-home/');
+				});
 			}
 		}
 
@@ -3084,7 +5652,36 @@ var app = new Framework7({
 		url: 'legExtensions.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToUpperlegHome').on('click', function () {
+					app.router.navigate('/upperleg-home/');
+				});
 			}
 		}
 
@@ -3096,7 +5693,36 @@ var app = new Framework7({
 		url: 'legPressMachine.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToUpperlegHome').on('click', function () {
+					app.router.navigate('/upperleg-home/');
+				});
 			}
 		}
 
@@ -3108,7 +5734,36 @@ var app = new Framework7({
 		url: 'smithMachineSquat.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToUpperlegHome').on('click', function () {
+					app.router.navigate('/upperleg-home/');
+				});
 			}
 		}
 
@@ -3120,7 +5775,36 @@ var app = new Framework7({
 		url: 'dumbbellStepUps.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToUpperlegHome').on('click', function () {
+					app.router.navigate('/upperleg-home/');
+				});
 			}
 		}
 
@@ -3132,7 +5816,36 @@ var app = new Framework7({
 		url: 'freehandJumpSquat.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToUpperlegHome').on('click', function () {
+					app.router.navigate('/upperleg-home/');
+				});
 			}
 		}
 
@@ -3144,7 +5857,36 @@ var app = new Framework7({
 		url: 'dumbbellRearLunge.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToUpperlegHome').on('click', function () {
+					app.router.navigate('/upperleg-home/');
+				});
 			}
 		}
 
@@ -3156,7 +5898,36 @@ var app = new Framework7({
 		url: 'bodyweightWalkingLunge.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToUpperlegHome').on('click', function () {
+					app.router.navigate('/upperleg-home/');
+				});
 			}
 		}
 
@@ -3168,7 +5939,36 @@ var app = new Framework7({
 		url: 'sitSquat.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToUpperlegHome').on('click', function () {
+					app.router.navigate('/upperleg-home/');
+				});
 			}
 		}
 
@@ -3180,7 +5980,36 @@ var app = new Framework7({
 		url: 'dumbbellPileSquat.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToUpperlegHome').on('click', function () {
+					app.router.navigate('/upperleg-home/');
+				});
 			}
 		}
 
@@ -3192,7 +6021,36 @@ var app = new Framework7({
 		url: 'dumbbellStiffLeggedDeadlift.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToUpperlegHome').on('click', function () {
+					app.router.navigate('/upperleg-home/');
+				});
 			}
 		}
 
@@ -3204,7 +6062,36 @@ var app = new Framework7({
 		url: 'Bridge.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToGlutesHome').on('click', function () {
+					app.router.navigate('/glutes-home/');
+				});
 			}
 		}
 
@@ -3216,7 +6103,36 @@ var app = new Framework7({
 		url: 'GluteKickback.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToGlutesHome').on('click', function () {
+					app.router.navigate('/glutes-home/');
+				});
 			}
 		}
 
@@ -3228,7 +6144,36 @@ var app = new Framework7({
 		url: 'FlutterKick.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToGlutesHome').on('click', function () {
+					app.router.navigate('/glutes-home/');
+				});
 			}
 		}
 
@@ -3240,7 +6185,36 @@ var app = new Framework7({
 		url: 'OneLegKickback.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToGlutesHome').on('click', function () {
+					app.router.navigate('/glutes-home/');
+				});
 			}
 		}
 
@@ -3252,7 +6226,36 @@ var app = new Framework7({
 		url: 'OneKneetoChest.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToGlutesHome').on('click', function () {
+					app.router.navigate('/glutes-home/');
+				});
 			}
 		}
 
@@ -3264,7 +6267,36 @@ var app = new Framework7({
 		url: 'BarbellGluteBridge.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToGlutesHome').on('click', function () {
+					app.router.navigate('/glutes-home/');
+				});
 			}
 		}
 
@@ -3276,7 +6308,36 @@ var app = new Framework7({
 		url: 'KneeAcrossTheBody.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToGlutesHome').on('click', function () {
+					app.router.navigate('/glutes-home/');
+				});
 			}
 		}
 
@@ -3288,7 +6349,36 @@ var app = new Framework7({
 		url: 'StandingAdductor.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToGlutesHome').on('click', function () {
+					app.router.navigate('/glutes-home/');
+				});
 			}
 		}
 
@@ -3300,7 +6390,36 @@ var app = new Framework7({
 		url: 'DumbbellStandingCalfRaise.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToLowerlegHome').on('click', function () {
+					app.router.navigate('/lowerleg-home/');
+				});
 			}
 		}
 
@@ -3312,7 +6431,36 @@ var app = new Framework7({
 		url: 'BarbellStandingCalfRaise.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToLowerlegHome').on('click', function () {
+					app.router.navigate('/lowerleg-home/');
+				});
 			}
 		}
 
@@ -3324,7 +6472,36 @@ var app = new Framework7({
 		url: 'BodyweightStandingCalfRaise.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToLowerlegHome').on('click', function () {
+					app.router.navigate('/lowerleg-home/');
+				});
 			}
 		}
 
@@ -3336,7 +6513,36 @@ var app = new Framework7({
 		url: 'CalfPressOnLegPress.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToLowerlegHome').on('click', function () {
+					app.router.navigate('/lowerleg-home/');
+				});
 			}
 		}
 
@@ -3348,7 +6554,36 @@ var app = new Framework7({
 		url: 'SmithMachineReverseCalfRaises.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToLowerlegHome').on('click', function () {
+					app.router.navigate('/lowerleg-home/');
+				});
 			}
 		}
 
@@ -3360,7 +6595,36 @@ var app = new Framework7({
 		url: 'CalfRaiseWithDumbbell.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToLowerlegHome').on('click', function () {
+					app.router.navigate('/lowerleg-home/');
+				});
 			}
 		}
 
@@ -3372,7 +6636,36 @@ var app = new Framework7({
 		url: 'StandingOneLegBodyweightCalfRaise.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToLowerlegHome').on('click', function () {
+					app.router.navigate('/lowerleg-home/');
+				});
 			}
 		}
 
@@ -3384,7 +6677,36 @@ var app = new Framework7({
 		url: 'Plank.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToAbsHome').on('click', function () {
+					app.router.navigate('/abs-home/');
+				});
 			}
 		}
 
@@ -3396,7 +6718,36 @@ var app = new Framework7({
 		url: 'Situp.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToAbsHome').on('click', function () {
+					app.router.navigate('/abs-home/');
+				});
 			}
 		}
 
@@ -3408,7 +6759,36 @@ var app = new Framework7({
 		url: 'LegRaise.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToAbsHome').on('click', function () {
+					app.router.navigate('/abs-home/');
+				});
 			}
 		}
 
@@ -3420,7 +6800,36 @@ var app = new Framework7({
 		url: 'DeclineCrunch.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToAbsHome').on('click', function () {
+					app.router.navigate('/abs-home/');
+				});
 			}
 		}
 
@@ -3432,7 +6841,36 @@ var app = new Framework7({
 		url: 'HangingLegRaise.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToAbsHome').on('click', function () {
+					app.router.navigate('/abs-home/');
+				});
 			}
 		}
 
@@ -3444,7 +6882,36 @@ var app = new Framework7({
 		url: 'AirBike.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToAbsHome').on('click', function () {
+					app.router.navigate('/abs-home/');
+				});
 			}
 		}
 
@@ -3456,7 +6923,36 @@ var app = new Framework7({
 		url: 'Crunches.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToAbsHome').on('click', function () {
+					app.router.navigate('/abs-home/');
+				});
 			}
 		}
 
@@ -3468,7 +6964,36 @@ var app = new Framework7({
 		url: 'CableCrunches.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToAbsHome').on('click', function () {
+					app.router.navigate('/abs-home/');
+				});
 			}
 		}
 
@@ -3480,7 +7005,36 @@ var app = new Framework7({
 		url: 'DumbbellSideBend.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToAbsHome').on('click', function () {
+					app.router.navigate('/abs-home/');
+				});
 			}
 		}
 
@@ -3492,7 +7046,36 @@ var app = new Framework7({
 		url: 'AlternateHeelTouchers.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToAbsHome').on('click', function () {
+					app.router.navigate('/abs-home/');
+				});
 			}
 		}
 
@@ -3504,7 +7087,36 @@ var app = new Framework7({
 		url: 'SideBridge.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToAbsHome').on('click', function () {
+					app.router.navigate('/abs-home/');
+				});
 			}
 		}
 
@@ -3516,7 +7128,36 @@ var app = new Framework7({
 		url: 'BarbellAbRolloutonKnees.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToAbsHome').on('click', function () {
+					app.router.navigate('/abs-home/');
+				});
 			}
 		}
 
@@ -3528,7 +7169,36 @@ var app = new Framework7({
 		url: 'CableSideBends.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToAbsHome').on('click', function () {
+					app.router.navigate('/abs-home/');
+				});
 			}
 		}
 
@@ -3540,7 +7210,36 @@ var app = new Framework7({
 		url: 'CrossBodyCrunch.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToAbsHome').on('click', function () {
+					app.router.navigate('/abs-home/');
+				});
 			}
 		}
 
@@ -3552,7 +7251,36 @@ var app = new Framework7({
 		url: 'WeightplateTwist.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToAbsHome').on('click', function () {
+					app.router.navigate('/abs-home/');
+				});
 			}
 		}
 
@@ -3564,7 +7292,36 @@ var app = new Framework7({
 		url: 'DumbbellTwoArmSideBend.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToAbsHome').on('click', function () {
+					app.router.navigate('/abs-home/');
+				});
 			}
 		}
 
@@ -3576,7 +7333,36 @@ var app = new Framework7({
 		url: 'BentKneeHipRaise.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToAbsHome').on('click', function () {
+					app.router.navigate('/abs-home/');
+				});
 			}
 		}
 
@@ -3588,7 +7374,36 @@ var app = new Framework7({
 		url: 'WeightedCrunches.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToAbsHome').on('click', function () {
+					app.router.navigate('/abs-home/');
+				});
 			}
 		}
 
@@ -3600,7 +7415,36 @@ var app = new Framework7({
 		url: 'HangingKneeRaise.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToAbsHome').on('click', function () {
+					app.router.navigate('/abs-home/');
+				});
 			}
 		}
 
@@ -3612,7 +7456,36 @@ var app = new Framework7({
 		url: 'BarbellSeatedTwist.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToAbsHome').on('click', function () {
+					app.router.navigate('/abs-home/');
+				});
 			}
 		}
 
@@ -3624,7 +7497,36 @@ var app = new Framework7({
 		url: 'DeclineBenchLegRaise.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToAbsHome').on('click', function () {
+					app.router.navigate('/abs-home/');
+				});
 			}
 		}
 
@@ -3636,7 +7538,36 @@ var app = new Framework7({
 		url: 'ToeTouchers.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToAbsHome').on('click', function () {
+					app.router.navigate('/abs-home/');
+				});
 			}
 		}
 
@@ -3648,7 +7579,36 @@ var app = new Framework7({
 		url: 'ScissorKick.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToAbsHome').on('click', function () {
+					app.router.navigate('/abs-home/');
+				});
 			}
 		}
 
@@ -3660,7 +7620,36 @@ var app = new Framework7({
 		url: 'SeatedFlatBenchLegPullIn.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToAbsHome').on('click', function () {
+					app.router.navigate('/abs-home/');
+				});
 			}
 		}
 
@@ -3672,7 +7661,36 @@ var app = new Framework7({
 		url: 'TreadmillRunning.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToCardioHome').on('click', function () {
+					app.router.navigate('/cardio-home/');
+				});
 			}
 		}
 
@@ -3684,7 +7702,36 @@ var app = new Framework7({
 		url: 'WalkingTreadmill.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToCardioHome').on('click', function () {
+					app.router.navigate('/cardio-home/');
+				});
 			}
 		}
 
@@ -3696,7 +7743,36 @@ var app = new Framework7({
 		url: 'StationaryBike.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToCardioHome').on('click', function () {
+					app.router.navigate('/cardio-home/');
+				});
 			}
 		}
 
@@ -3708,7 +7784,36 @@ var app = new Framework7({
 		url: 'JumpRope.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToCardioHome').on('click', function () {
+					app.router.navigate('/cardio-home/');
+				});
 			}
 		}
 
@@ -3720,7 +7825,36 @@ var app = new Framework7({
 		url: 'BarbellShrug.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToTrapeziusHome').on('click', function () {
+					app.router.navigate('/trapezius-home/');
+				});
 			}
 		}
 
@@ -3732,7 +7866,36 @@ var app = new Framework7({
 		url: 'DumbbellShrug.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToTrapeziusHome').on('click', function () {
+					app.router.navigate('/trapezius-home/');
+				});
 			}
 		}
 
@@ -3744,7 +7907,36 @@ var app = new Framework7({
 		url: 'DumbbellShrugInclineBench.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToTrapeziusHome').on('click', function () {
+					app.router.navigate('/trapezius-home/');
+				});
 			}
 		}
 
@@ -3756,7 +7948,36 @@ var app = new Framework7({
 		url: 'CableShrug.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToTrapeziusHome').on('click', function () {
+					app.router.navigate('/trapezius-home/');
+				});
 			}
 		}
 
@@ -3768,7 +7989,36 @@ var app = new Framework7({
 		url: 'SideCableRaise.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToTrapeziusHome').on('click', function () {
+					app.router.navigate('/trapezius-home/');
+				});
 			}
 		}
 
@@ -3780,7 +8030,36 @@ var app = new Framework7({
 		url: 'BarbellShoulderHighpull.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToTrapeziusHome').on('click', function () {
+					app.router.navigate('/trapezius-home/');
+				});
 			}
 		}
 
@@ -3792,7 +8071,36 @@ var app = new Framework7({
 		url: 'DumbbellOne-ArmUprightRow.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToTrapeziusHome').on('click', function () {
+					app.router.navigate('/trapezius-home/');
+				});
 			}
 		}
 
@@ -3804,7 +8112,36 @@ var app = new Framework7({
 		url: 'UprightCableRow.html',
 		on: {
 			pageInit: function () {
-
+				app.request.post('http://' + ip + '/phpfile/selectTampilanLatihan.php', {
+					simpan_id: localStorage.getItem('id_exercise')
+				},
+					function (data) {
+						$$('.canvasExercise').html('');
+						var obj = JSON.parse(data);
+						var counter = Object.keys(obj).length;
+						for (var i = 0; i < counter; i++) {
+							$$('.canvasExercise').append(
+								'<div class="container block cardsExercise" style="background-repeat: no-repeat; background-position: center; background-size: 50% 50%; background-image: url(http://' + ip + '/phpfile/img/' + obj[i].gambar_gif_latihan + ');">' +
+								'<a href="#">Link Youtube</a>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Fokus muscle</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].focus_muscle + '</p>' +
+								'</div>' +
+								'<div class="block-title">' +
+								'<b>Deskripsi</b>' +
+								'</div>' +
+								'<div class="block block-strong" style="font-size: 13px;">' +
+								'<p>' + obj[i].deskripsi_exercise + '</p>' +
+								'</div>'
+							);
+						}
+					});
+				$$('.backToTrapeziusHome').on('click', function () {
+					app.router.navigate('/trapezius-home/');
+				});
 			}
 		}
 
@@ -3829,18 +8166,17 @@ var notificationFull = app.notification.create({
 	title: 'Alfa Fit',
 	subtitle: 'Welcome',
 	text: 'Aplikasi Alfa Fit akan membantu mewujudkan body goals anda!',
-	closeTimeout: 1000,
+	closeTimeout: 2000, //1300
 	on: {
 		opened: function () {
 			var a = localStorage.getItem('email');
-			text: 'hallo';
 		}
 	},
 
 });
 
 
-var $$ = Dom7;
+
 
 $$('.my-sheet').on('sheet:open', function (e, sheet) {
 	console.log('my-sheet open');
@@ -3849,7 +8185,6 @@ $$('.my-sheet').on('sheet:opened', function (e, sheet) {
 	console.log('my-sheet opened');
 });
 
-var ip = '192.168.43.236';
 
 var mainView = app.views.create('.view-main');
 

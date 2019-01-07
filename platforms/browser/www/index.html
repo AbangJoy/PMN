@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <!-- Required meta tags-->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#2196f3">
+  <!-- Your app title -->
+  <title>My App</title>
+  <!-- Path to Framework7 Library CSS -->
+
+  <link rel="stylesheet" href="css/framework7.min.css">
+  <!-- Path to your custom app styles-->
+  <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/my-app.css">
+  <link rel="stylesheet" href="css/framework7-icons.css">
+  <link rel="stylesheet" href="css/icons.css">
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+  <style type="text/css">
+    #index {
+      background-size: cover;
+      background-image: url(img/background1.jpg);
+    }
+
+    #fontalfafit {
+      font-family: galatic;
+      margin-left: 56%;
+    }
+
+    #fontalfafit2 {
+      font-family: galatic;
+      margin-left: 10%;
+      margin-top: -2px;
+    }
+
+    @font-face {
+      font-family: galatic;
+
+      src: url(fonts/galatic.ttf);
+    }
+
+
+    .col-34 {
+      font-family: Bookman Old Style, serif;
+      text-transform: uppercase;
+
+      margin-top: 10px;
+      margin-left: 15px;
+      border: solid 1px #000000;
+      padding: 13px;
+      text-align: justify;
+      line-height: 2px;
+      color: white;
+      font-size: 14px
+    }
+
+    .col-36 {
+      font-family: Bookman Old Style, serif;
+      text-transform: uppercase;
+
+      margin-top: 10px;
+      margin-right: 5px;
+      border: solid 1px #000000;
+      padding: 13px;
+      text-align: justify;
+      line-height: 2px;
+      color: white;
+      font-size: 14px
+    }
+
+
+    #tulisanbawahhome {
+      font: italic 1.2em "Fira Sans", serif;
+      margin-top: 340px;
+      margin-left: 10px;
+
+
+
+    }
+
+    .size-16 {
+      font-size: 16.5px;
+    }
+
+    .size-50 {
+      font-size: 60px;
+    }
+
+    .size-15 {
+      font-size: 20px;
+    }
+
+    .spasi1 {
+      margin-top: 20px;
+    }
+
+    .swiper-container {
+      height: 27%;
+    }
+
+    .swiper-slide {
+      font-size: 25px;
+      font-weight: 300;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #fff;
+      color: #000;
+    }
+
+    .swiper-slide {
+      box-sizing: border-box;
+      box-shadow: 5px 10px #888888;
+
+      border-left: 2px solid #000000;
+      border-right: 2px solid #000000;
+      border-bottom: 4px solid #000000;
+      background: #fff;
+    }
+
+    .cardForum {
+      height: 100%;
+
+
+    }
+
+    .cardshortcut1 {
+      height: 30%;
+      background-image: url(img/background5.jpg);
+      background-size: cover;
+      border-bottom: 4px solid #000000;
+
+    }
+
+    .cardshortcut2 {
+      height: 30%;
+      background-image: url(img/background6.jpg);
+      background-size: cover;
+      border-bottom: 4px solid #D3D3D3;
+
+    }
+
+    .cardsMenuGeneralPlan {
+      height: 25%;
+      border-top: 1px solid black;
+      border-bottom: 1px solid black;
+
+    }
+
+    .cardsMenuCustomPlan {
+      height: 30%;
+      border-top: 1px solid black;
+      border-bottom: 1px solid black;
+
+    }
+
+    .cardsExercise {
+      height: 35%;
+      border-bottom: 2px solid #000000;
+
+    }
+
+    #headerfont {
+
+      font-family: galatic;
+      color: white;
+      line-height: 15px;
+      padding-top: 13px;
+    }
+
+    #itemfont {
+      color: white;
+      line-height: 13px;
+      font-size: 12px;
+    }
+
+    #footerfont {
+      font-size: 12px;
+      width: 60px;
+      height: 12px;
+      border: 2px solid;
+      border-radius: 5px;
+      border-color: blue;
+      color: white;
+      background-color: blue;
+      padding-top: 1px;
+      padding-right: 10px;
+      padding-left: 10px;
+
+    }
+
+    #shortcutGetPlan {
+      font-size: 12px;
+      width: 60px;
+      height: 12px;
+      border: 2px solid;
+      border-radius: 5px;
+      border-color: blue;
+      color: white;
+      background-color: blue;
+      padding: 5px 20px;
+
+    }
+
+    #shortcutGetPlan2 {
+      font-size: 12px;
+      width: 60px;
+      height: 12px;
+      border: 2px solid;
+      border-radius: 5px;
+      border-color: blue;
+      color: white;
+      background-color: blue;
+      padding: 5px 20px;
+
+    }
+
+
+    #gridexercise {
+      background: #fff;
+      color: white;
+      border: 1px solid #000000;
+      font-size: 10px;
+
+    }
+
+    #gridexercise1 {
+      background: #fff;
+      color: white;
+      border: 1px solid #000000;
+      font-size: 12px;
+      width: 90px;
+      height: 92px;
+      text-align: center;
+
+    }
+
+    .gridFeedback {
+      background: #fff;
+      color: white;
+      border: 2px solid #ffffff;
+      font-size: 12px;
+      width: 50px;
+      height: 150px;
+      text-align: center;
+
+    }
+
+
+
+    #app {
+      background: url(img/logo.png) no-repeat center top;
+    }
+
+    .myprofilecard {
+      background: #fff;
+      width: 295px;
+      height: 700px;
+
+
+    }
+
+    .planscard {
+      background: #fff;
+      width: 100%;
+      height: 520px;
+
+
+    }
+
+    .canvasHome {
+      background: #000000;
+      width: 100%;
+      height: 510px;
+
+
+    }
+
+    .canvasPorsiLatihan {
+      background: white;
+      width: 100%;
+      height: 630px;
+    }
+
+    .canvasExercise {
+      background: white;
+      width: 100%;
+      height: 610px;
+    }
+
+    .canvasMenuGeneralPlan {
+      background: white;
+      width: 100%;
+      height: 460px;
+    }
+
+    .canvasCustomPlan {
+      background: white;
+      width: 100%;
+      height: 500px;
+
+
+    }
+
+    .cuttingplanscard {
+      background: #fff;
+      width: 100%;
+      height: 880px;
+
+
+    }
+
+    .bulkingplanscard {
+      background: #fff;
+      width: 100%;
+      height: 880px;
+
+
+    }
+
+    .conditioningplanscard {
+      background: #fff;
+      width: 100%;
+      height: 880px;
+
+
+    }
+
+    .generalplanscard {
+      background: #fff;
+      width: 100%;
+      height: 520px;
+
+
+    }
+
+    .customplanscard {
+      background: #fff;
+      width: 100%;
+      height: 550px;
+
+
+    }
+
+    .top-section {
+      background: #ACC0E9;
+      height: 83px;
+      border-radius: 4px 4px 0 0;
+    }
+
+    .bottom-section {
+      padding: 5px 50px 50px;
+    }
+
+    .avatar {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .bodycondition {
+      height: 580px;
+      width: 240px;
+      border: 2px solid #ACC0E9;
+      border-radius: 10px;
+      margin-left: -20px;
+      margin-bottom: -100px;
+    }
+
+    .cardplanshome {
+
+      background-size: cover;
+      background-position: center;
+      background: #000000;
+    }
+
+    .demo-facebook-card .card-header {
+      display: block;
+      padding: 10px;
+    }
+
+    .demo-facebook-card .demo-facebook-avatar {
+      float: left;
+    }
+
+    .demo-facebook-card .demo-facebook-name {
+
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .demo-facebook-card .demo-facebook-date {
+
+      font-size: 13px;
+      color: #8e8e93;
+    }
+
+    .demo-facebook-card .card-footer {
+      background: #fafafa;
+    }
+
+    .demo-facebook-card .card-footer a {
+      color: #81848b;
+      font-weight: 500;
+    }
+
+    .demo-facebook-card .card-content img {
+      display: block;
+    }
+
+    .demo-facebook-card .card-content-padding {
+      padding: 15px 10px;
+    }
+
+    .demo-facebook-card .card-content-padding .likes {
+      color: #8e8e93;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- App root element -->
+  <div id="app">
+    <!-- Statusbar overlay -->
+
+
+    <!-- Your main view, should have "view-main" class -->
+    <div class="view view-main">
+      <!-- Initial Page, "data-name" contains page name -->
+      <div id="index" data-name="index" class="page">
+        <!-- Scrollable page content -->
+        <div class="page-content">
+          <div class="navbar" style="background-color: transparent;">
+            <div class="navbar-inner">
+              <a href="/signup/" class="button col-34 left">Sign Up</a>
+              <div class="title" id="fontalfafit2">Alfa
+                <span style=" color:red;">Fit</span>
+              </div>
+              <a href="/login/" class="button col-36 right">Login</a>
+            </div>
+          </div>
+
+          <div id="tulisanbawahhome" class="block-footer" style="color:#808080;   text-align: center;">
+            <p>“Looking after my health today gives me a better hope for tomorrow.”</p>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <!-- Path to Framework7 Library JS-->
+  <script type="text/javascript" src="js/framework7.min.js"></script>
+  <!-- Path to your app js-->
+  <script type="text/javascript" src="js/my-app.js"></script>
+</body>
+
+</html>

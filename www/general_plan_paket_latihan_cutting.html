@@ -1,97 +1,84 @@
 <div class="view view-main">
-    <div class="page" style="background-color: black;">
-        <!-- Fixed/Dynamic Navbar -->
-        <div class="page" data-name="general_plan_paket_latihan">
-            <div class="navbar" style="background-color:#141f1f;">
-                <div class="navbar-inner">
-                    <div class="left">
-                        <a href="/cuttingGeneralPlan/" class="link">
-                            <i class="icon icon-back"></i>
-                        </a>
-                    </div>
-                    <div class="title" style="font-family: galatic; margin-left: 40%;">Alfa
-                        <span style="color:red;">Fit</span>
+    <div class="page" data-name="general_plan_paket_latihan_cutting" style="background-color: white;">
+        <div class="navbar" style="background-color:#141f1f;">
+            <div class="navbar-inner">
+                <div class="left">
+                    <a href="/cuttingGeneralPlan/" class="link">
+                        <i class="icon icon-back"></i>
+                    </a>
+                </div>
+                <div class="title" style="font-family: galatic; margin-left: 40%;">Alfa
+                    <span style="color:red;">Fit</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-content infinite-scroll-content">
+            <div class="canvasPorsiLatihan">
+                <div class="block-title" style="text-align: center;">
+                    <b></b>
+                </div>
+                <div class="block-title">
+                    <b></b>
+                </div>
+                <div class="block-title block-strong" style="font-size: 13px;">
+                    <h2></h2>
+                    <h5></h5>
+                    <a href="#" class="link"></a>
+                    <h2></h2>
+                    <h5></h5>
+                    <a href="#" class="link"></a>
+                    <div class="block-header" style="text-align: center; font-size: 16px; font-weight:bold; letter-spacing: -1px; color: black;">MASIH
+                        BELUM ADA LATIHAN
                     </div>
                 </div>
             </div>
-
-            <div class="page-content infinite-scroll-content">
-                <div class="canvasPorsiLatihan">
-                    <div class="block-title" style="text-align: center;">
-                        <b>WEEK 1</b>
-                    </div>
-                    <div class="block-title">
-                        <b>SENIN</b>
-                    </div>
-                    <div class="block-title block-strong" style="font-size: 13px;">
-                        <h2>Biceps Birachi</h2>
-                        <h5>4 sets 12reps</h5>
-                        <a href="#" class="link">Lihat contoh gerakan</a>
-                        <h2>Triceps Cable</h2>
-                        <h5>4 sets 12reps</h5>
-                        <a href="#" class="link">Lihat contoh gerakan</a>
-                    </div>
-                    <form name="formLanjutHariLatihan" action="http://localhost/phpfile/nextLatihan.php" method="POST"
-                        class="form-ajax-submit">
-                        <div class="list no-hairlines-md">
-                            <ul>
-                                <li class="item-content item-input">
-                                    <div class="item-inner">
-                                        <div class="item-input-group">
-                                            <input type="button" value="SELESAI LATIHAN" class="btn btn-primary btn-sm"
-                                                id="btnKomentar" style="margin-left:80px; margin-top: 15px;" />
-                                        </div>
-                                    </div>
-                                </li>
-                            </ul>
-                        </div>
-                    </form>
-
-                </div>
-
-                <div class="toolbar tabbar-labels toolbar-bottom-md" style="background-color:#0a0f0f;">
-                    <div class="toolbar-inner">
-                        <a href="/home/" class="tab-link">
-                            <i class="icon f7-icons ios-only">home</i>
-                            <i class="icon f7-icons ios-only icon-ios-fill">home_fill</i>
-                            <i class="icon material-icons md-only">home</i>
-                            <span class="tabbar-label" style="font-size: 10px;">Home</span>
-                        </a>
-                        <a href="/exercise/" class="tab-link tab-link-active">
-                            <i class="icon f7-icons ios-only">fitness_center</i>
-                            <i class="icon f7-icons ios-only icon-ios-fill">fitness_center_fill</i>
-                            <i class="icon material-icons md-only">fitness_center</i>
-                            <span class="tabbar-label" style="font-size: 10px;">Exercises</span>
-                        </a>
-                        <a href="/plans/" class="tab-link">
-                            <i class="icon f7-icons ios-only">assignment</i>
-                            <i class="icon f7-icons ios-only icon-ios-fill">assignment_fill</i>
-                            <i class="icon material-icons md-only">assignment</i>
-                            <span class="tabbar-label" style="font-size: 10px;">Plans</span>
-                        </a>
-                        <a href="/setcondition/" class="tab-link">
-                            <i class="icon f7-icons ios-only">star</i>
-                            <i class="icon f7-icons ios-only icon-ios-fill">star_fill</i>
-                            <i class="icon material-icons md-only">star</i>
-                            <span class="tabbar-label" style="font-size: 10px;">My Nutritions</span>
-                        </a>
-                        <a href="/forum/" class="tab-link">
-                            <i class="icon f7-icons ios-only">chat</i>
-                            <i class="icon f7-icons ios-only icon-ios-fill">chat_fill</i>
-                            <i class="icon material-icons md-only">chat</i>
-                            <span class="tabbar-label" style="font-size: 10px;">Forums</span>
-                        </a>
-                        <a href="/myprofile/" class="tab-link">
-                            <i class="icon f7-icons ios-only">person</i>
-                            <i class="icon f7-icons ios-only icon-ios-fill">person_fill</i>
-                            <i class="icon material-icons md-only">person</i>
-                            <span class="tabbar-label" style="font-size: 10px;">My Profile</span>
-                        </a>
-                    </div>
+            <ul>
+                <input type="button" value="Berikan Feedback" class="btn btn-primary btn-sm" id="btnFeedback" style="margin-left:25%;" />
+            </ul>
+            <div class="toolbar tabbar-labels toolbar-bottom-md" style="background-color:#0a0f0f;">
+                <div class="toolbar-inner">
+                    <a href="/home/" class="tab-link">
+                        <i class="icon f7-icons ios-only">home</i>
+                        <i class="icon f7-icons ios-only icon-ios-fill">home_fill</i>
+                        <i class="icon material-icons md-only">home</i>
+                        <span class="tabbar-label" style="font-size: 10px;">Home</span>
+                    </a>
+                    <a href="/exercise/" class="tab-link tab-link-active">
+                        <i class="icon f7-icons ios-only">fitness_center</i>
+                        <i class="icon f7-icons ios-only icon-ios-fill">fitness_center_fill</i>
+                        <i class="icon material-icons md-only">fitness_center</i>
+                        <span class="tabbar-label" style="font-size: 10px;">Exercises</span>
+                    </a>
+                    <a href="/plans/" class="tab-link">
+                        <i class="icon f7-icons ios-only">assignment</i>
+                        <i class="icon f7-icons ios-only icon-ios-fill">assignment_fill</i>
+                        <i class="icon material-icons md-only">assignment</i>
+                        <span class="tabbar-label" style="font-size: 10px;">Plans</span>
+                    </a>
+                    <a href="/setcondition/" class="tab-link">
+                        <i class="icon f7-icons ios-only">star</i>
+                        <i class="icon f7-icons ios-only icon-ios-fill">star_fill</i>
+                        <i class="icon material-icons md-only">star</i>
+                        <span class="tabbar-label" style="font-size: 10px;">My Nutritions</span>
+                    </a>
+                    <a href="/forum/" class="tab-link">
+                        <i class="icon f7-icons ios-only">chat</i>
+                        <i class="icon f7-icons ios-only icon-ios-fill">chat_fill</i>
+                        <i class="icon material-icons md-only">chat</i>
+                        <span class="tabbar-label" style="font-size: 10px;">Forums</span>
+                    </a>
+                    <a href="/myprofile/" class="tab-link">
+                        <i class="icon f7-icons ios-only">person</i>
+                        <i class="icon f7-icons ios-only icon-ios-fill">person_fill</i>
+                        <i class="icon material-icons md-only">person</i>
+                        <span class="tabbar-label" style="font-size: 10px;">My Profile</span>
+                    </a>
                 </div>
             </div>
-
         </div>
 
     </div>
+
+
 </div>

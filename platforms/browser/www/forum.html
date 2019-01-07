@@ -1,0 +1,136 @@
+<div class="view view-main">
+    <div class="page" style="background-color: black;">
+        <!-- Fixed/Dynamic Navbar -->
+        <div class="page" data-name="forum">
+            <div class="navbar" style="background-color:#141f1f;">
+                <div class="navbar-inner">
+                    <div class="left">
+                        <a href="/home/" class="link">
+                            <i class="icon icon-back"></i>
+                        </a>
+                    </div>
+                    <div class="title">Forum</div>
+                    <div class="right">
+                        <a href="/buatForum/" class="link">
+                            <i class="f7-icons add">add</i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-content" style="height: 85%;">
+                <div class="container-forum">
+                    <div class="card demo-facebook-card" style="height:30%;">
+                        <div class="card-header">
+                            <div class="demo-facebook-name"></div>
+                            <div class="demo-facebook-date"></div>
+                        </div>
+                        <div class="card-content card-content-padding">
+                            <p>
+                                <b></b>
+                            </p>
+                            <p></p>
+                            <!-- <a href="#" class="link sheet-open" data-sheet=".komentarSheet" style="color: black;">
+                                <i class="f7-icons chats">chats</i>
+                                <p style="margin-top: 10px; margin-left: 5px;">30</p>
+                            </a> -->
+                            <div class="block-header" style="text-align: center; font-size: 20px; font-weight:bold; letter-spacing: -1px; color: black;">MASIH
+                                BELUM ADA FORUM YANG DIBUAT
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="sheet-modal komentarSheet" style="height: 250px; overflow: scroll;">
+                <div class="toolbar " style="background-color: black; ">
+                    <div class="toolbar-inner ">
+                        <div class="left ">
+                            <a class="link sheet-close " href="# ">Komentar</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="sheet-modal-inner ">
+                    <div class="page-content">
+                        <div class="container-komentar">
+                            <div class="block-title">Block title</div>
+                            <div class="block">
+                                <p>Donec et nulla auctor massa pharetra adipiscing ut sit amet sem. Suspendisse
+                                    molestie velit
+                                    vitae mattis tincidunt. Ut sit amet quam mollis, vulputate turpis vel, sagittis
+                                    felis.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="toolbar-bottom-md" style="width: 100%;">
+                    <form name="formBuatKomentar" action="http://localhost/phpfile/inputKomentar.php" method="POST"
+                        class="form-ajax-submit">
+                        <div class="list no-hairlines-md">
+                            <ul>
+                                <li class="item-content item-input">
+                                    <div class="item-inner">
+                                        <div class="item-input-group">
+                                            <textarea class="resizable" id="isi_komentar" placeholder="Commend"></textarea>
+                                            <input type="button" value="KIRIM" class="btn btn-primary btn-sm" id="btnKomentar"
+                                                style="margin-left:110px; margin-top: 15px;" />
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </form>
+                </div>
+
+
+            </div>
+        </div>
+
+
+        <!-- Tabbar for switching views-tabs -->
+        <div class="toolbar tabbar-labels toolbar-bottom-md" style="background-color:#0a0f0f;">
+            <div class="toolbar-inner">
+                <a href="/home/" class="tab-link">
+                    <i class="icon f7-icons ios-only">home</i>
+                    <i class="icon f7-icons ios-only icon-ios-fill">home_fill</i>
+                    <i class="icon material-icons md-only">home</i>
+                    <span class="tabbar-label" style="font-size: 10px;">Home</span>
+                </a>
+                <a href="/exercise/" class="tab-link">
+                    <i class="icon f7-icons ios-only">fitness_center</i>
+                    <i class="icon f7-icons ios-only icon-ios-fill">fitness_center_fill</i>
+                    <i class="icon material-icons md-only">fitness_center</i>
+                    <span class="tabbar-label" style="font-size: 10px;">Exercises</span>
+                </a>
+                <a href="/plans/" class="tab-link">
+                    <i class="icon f7-icons ios-only">assignment</i>
+                    <i class="icon f7-icons ios-only icon-ios-fill">assignment_fill</i>
+                    <i class="icon material-icons md-only">assignment</i>
+                    <span class="tabbar-label" style="font-size: 10px;">Plans</span>
+                </a>
+                <a href="/setcondition/" class="tab-link">
+                    <i class="icon f7-icons ios-only">star</i>
+                    <i class="icon f7-icons ios-only icon-ios-fill">star_fill</i>
+                    <i class="icon material-icons md-only">star</i>
+                    <span class="tabbar-label" style="font-size: 10px;">My Nutritions</span>
+                </a>
+                <a href="/forum/" class="tab-link tab-link-active">
+                    <i class="icon f7-icons ios-only">chat</i>
+                    <i class="icon f7-icons ios-only icon-ios-fill">chat_fill</i>
+                    <i class="icon material-icons md-only">chat</i>
+                    <span class="tabbar-label" style="font-size: 10px;">Forums</span>
+                </a>
+                <a href="/myprofile/" class="tab-link">
+                    <i class="icon f7-icons ios-only">person</i>
+                    <i class="icon f7-icons ios-only icon-ios-fill">person_fill</i>
+                    <i class="icon material-icons md-only">person</i>
+                    <span class="tabbar-label" style="font-size: 10px;">My Profile</span>
+                </a>
+            </div>
+        </div>
+
+
+
+
+    </div>
+</div>

@@ -1,0 +1,153 @@
+<div class="view view-main">
+    <div class="page" data-name="setcondition" style="background-color: white;">
+        <!-- Fixed/Dynamic Navbar -->
+
+        <div class="navbar" style="background-color:#141f1f;">
+            <div class="navbar-inner">
+
+                <div class="title" style="font-family: galatic; margin-left: 57%;">Alfa
+                    <span style="color:red;">Fit</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-content infinite-scroll-content">
+            <form name="formSubmitCondition" action="http://localhost/phpfile/inputcondition.php" method="POST" class="form-ajax-submit">
+                <div class="container" style="color: white; height: 100px;">
+                    <!-- Block footer -->
+                    <div class="block-header" style="text-align: center; font-size: 20px; font-weight:bold; letter-spacing: -1px; color: black;">HITUNG
+                        NUTRISI MAKRO ANDA SEKARANG
+                    </div>
+                    <div class="block-content" style="text-align: center; font-size: 14px; color: black;">Dengan
+                        perhitungan nutrisi makro, anda dapat mengetahui BMI(body mass index)anda serta mengetahui
+                        jumlah
+                        harian kalori yang anda butuhkan hingga nutrisi yang dibutuhkan seperti protein, karbohidrat
+                        dan
+                        lemak.
+                    </div>
+                </div>
+                <div class="list inline-labels no-hairlines-md" style="margin-top: 30%;">
+                    <ul>
+                        <li class="item-content item-input">
+                            <div class="item-inner">
+                                <div class="item-title item-label">Height</div>
+                                <div class="item-input-wrap">
+                                    <input type="text" placeholder="Your Height in cm" id="height" name="height"
+                                        maxlength="3" />
+                                    <span class="input-clear-button"></span>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="item-content item-input">
+
+                            <div class="item-inner">
+                                <div class="item-title item-label">Weight</div>
+                                <div class="item-input-wrap">
+                                    <input type="text" placeholder="Your Weight in kg" id="weight" name="weight"
+                                        maxlength="3" />
+                                    <span class="input-clear-button"></span>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="item-content item-input">
+
+                            <div class="item-inner">
+                                <div class="item-title item-label">Age</div>
+                                <div class="item-input-wrap">
+                                    <input type="text" placeholder="Your Age" id="age" name="age" maxlength="3" size="7" />
+                                    <span class="input-clear-button"></span>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="item-content item-input">
+                            <div class="item-inner">
+                                <div class="item-title item-label">Body type</div>
+                                <div class="item-input-wrap">
+                                    <select id="bodytype" name="bodytype" placeholder="Please choose...">
+                                        <option value="Ectomorph">Ectomorph</option>
+                                        <option value="Mesomorph">Mesomorph</option>
+                                        <option value="Endomorph">Endomorph</option>
+
+                                    </select>
+                                </div>
+                                <a href="/helpbodytype/" class="icon-block">
+                                    <i class="icon material-icons md-only">help</i>
+                                </a>
+                            </div>
+                        </li>
+
+                        <li class="item-content item-input">
+                            <div class="item-inner">
+                                <div class="item-title item-label">Activity</div>
+                                <div class="item-input-wrap">
+                                    <select id="levelaktifitas" name="levelaktifitas" placeholder="Please choose...">
+                                        <option value="Kurangaktif">Kurangaktif</option>
+                                        <option value="Aktif">Aktif</option>
+                                        <option value="Sangataktif">Sangataktif</option>
+                                        <option value="Atlet">Atlet</option>
+                                    </select>
+
+
+                                </div>
+                                <a href="/helpActivity/" class="icon-block">
+                                    <i class="icon material-icons md-only">help</i>
+                                </a>
+                            </div>
+                        </li>
+
+                        <li>
+                            <input type="button" value="HITUNG" class="btn btn-primary btn-sm" id="btnsubmitcondition"
+                                style="margin-left:120px; margin-top: 15px;" />
+                        </li>
+
+                    </ul>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tabbar for switching views-tabs -->
+        <div class="toolbar tabbar-labels toolbar-bottom-md" style="background-color:#0a0f0f;">
+            <div class="toolbar-inner">
+                <a href="/home/" class="tab-link">
+                    <i class="icon f7-icons ios-only">home</i>
+                    <i class="icon f7-icons ios-only icon-ios-fill">home_fill</i>
+                    <i class="icon material-icons md-only">home</i>
+                    <span class="tabbar-label" style="font-size: 10px;">Home</span>
+                </a>
+                <a href="/exercise/" class="tab-link ">
+                    <i class="icon f7-icons ios-only">fitness_center</i>
+                    <i class="icon f7-icons ios-only icon-ios-fill">fitness_center_fill</i>
+                    <i class="icon material-icons md-only">fitness_center</i>
+                    <span class="tabbar-label" style="font-size: 10px;">Exercises</span>
+                </a>
+                <a href="/plans/" class="tab-link">
+                    <i class="icon f7-icons ios-only">assignment</i>
+                    <i class="icon f7-icons ios-only icon-ios-fill">assignment_fill</i>
+                    <i class="icon material-icons md-only">assignment</i>
+                    <span class="tabbar-label" style="font-size: 10px;">Plans</span>
+                </a>
+                <a href="/setcondition/" class="tab-link tab-link-active">
+                    <i class="icon f7-icons ios-only">star</i>
+                    <i class="icon f7-icons ios-only icon-ios-fill">star_fill</i>
+                    <i class="icon material-icons md-only">star</i>
+                    <span class="tabbar-label" style="font-size: 10px;">My Nutritions</span>
+                </a>
+                <a href="/forum/" class="tab-link">
+                    <i class="icon f7-icons ios-only">chat</i>
+                    <i class="icon f7-icons ios-only icon-ios-fill">chat_fill</i>
+                    <i class="icon material-icons md-only">chat</i>
+                    <span class="tabbar-label" style="font-size: 10px;">Forums</span>
+                </a>
+                <a href="/myprofile/" class="tab-link">
+                    <i class="icon f7-icons ios-only">person</i>
+                    <i class="icon f7-icons ios-only icon-ios-fill">person_fill</i>
+                    <i class="icon material-icons md-only">person</i>
+                    <span class="tabbar-label" style="font-size: 10px;">My Profile</span>
+                </a>
+            </div>
+        </div>
+
+
+    </div>
+</div>
